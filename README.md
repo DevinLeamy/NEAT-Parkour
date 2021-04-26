@@ -1,4 +1,4 @@
-TODO (by the end of April 26th):
+## TODO (by the end of April 26th):
 1. Port everything over to a python file (DONE)
 2. Create Github Repo for project   
 3. Display blocks
