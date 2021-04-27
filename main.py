@@ -7,10 +7,10 @@ pygame.init()
 pygame.display.init()
 
 # Constants
-W = 1000
+W = 1080
 H = 800
-BLOCKS = 20
-BLOCK_SZ = W / BLOCKS
+BLOCKS = 18 
+BLOCK_SZ = int(W / BLOCKS)
 SCN = pygame.display.set_mode((W, H))
 LOAD = ImageLoader()
 DELAY = 20
@@ -35,8 +35,8 @@ class Color():
   GREY = (230, 230, 230)
 
 class Tile():
-  GRASS = "TileSet/Tiles/grass.png"
-  DIRT = "TileSet/Tiles/dirt.png"
+  GRASS = "TileSet2/Tiles/GrassMid.png"
+  DIRT = "TileSet2/Tiles/Dirt.png"
 
 # Player 
 class ParkourKing(pygame.sprite.Sprite):
@@ -286,7 +286,7 @@ class Map:
     # Add buffer to back
     for row in self.grid:
       image = Tile.DIRT
-      if row[0].row == 8:
+      if row[0].row == Level.GRND:
         image = Tile.GRASS
       row.extend([Block(row[0].row, BLOCKS + i, image) for i in range(self.BUFFER)])
 
@@ -306,7 +306,7 @@ class Block(pygame.sprite.Sprite):
     
     # Set sprite image
     self.image = LOAD.load_image(image_path)
-    self.image = pygame.transform.scale(self.image, (50, 50))
+    self.image = pygame.transform.scale(self.image, (BLOCK_SZ, BLOCK_SZ))
     # Scale image to BLOCK_SZ X BLOCK_SZ
     self.rect = self.image.get_rect()
     self.rect.topleft = [self.col * BLOCK_SZ, self.row * BLOCK_SZ]
