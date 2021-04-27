@@ -33,6 +33,10 @@ class Color():
   WHITE = (255, 255, 255)
   GREY = (230, 230, 230)
 
+class Tile():
+  GRASS = "TileSet/Tiles/grass.png"
+  DIRT = "TileSet/Tiles/dirt.png"
+
 # Player 
 class ParkourKing(pygame.sprite.Sprite):
   def __init__(self):
@@ -184,39 +188,65 @@ class ParkourKing(pygame.sprite.Sprite):
 # Game  
 class Game:
   def __init__(self):
-    # Create player sprite
+    # Add player sprite
     self.PK = ParkourKing()
-    self.player = pygame.sprite.Group() 
-    self.player.add(self.PK)
+
+    # Create map and add block sprites
     self.game_map = Map()
   
   # Updates all game sprites
   def update(self):
-    global SCN
-    self.player.draw(SCN)
-    self.player.update()
-    self.game_map.update()
+    # Update player
+    self.PK.update()
 
+    self.draw()
+
+  # Draw game state
+  def draw(self):
+    global SCN
+    # Create sprite group
+    sprites = pygame.sprite.Group()
+
+    # Add player sprite
+    sprites.add(self.PK)
+
+    # Add block sprites 
+    map_blocks = self.game_map.get_sprites()
+    for block in map_blocks:
+      sprites.add(block)
+
+    # Draw sprites to screen
+    sprites.draw(SCN)
+
+    
 # Map
 class Map:
   def __init__(self):
     global BLOCKS
-    # Create map
-    self.grid = [[Block(i, j) for i in range(BLOCKS)] for j in range(BLOCKS)] # Static map, to be removed
-    self.sprites = pygame.sprite.Group()
+
+    # Create map (STATIC MAP - REMOVE)
+    self.grid = []
+    row = list()
+    for i in range(BLOCKS):
+      row.append(Block(i, 8, Tile.GRASS))
+    self.grid.append(row)
+    for i in range(BLOCKS):
+      row = list()
+      for j in range(1, BLOCKS - 9):
+        row.append(Block(i, j + 8, Tile.DIRT))
+      self.grid.append(row)
+
+  # Returns block sprites
+  def get_sprites(self):
+    sprites = list()
     for row in self.grid:
       for block in row:
-        self.sprites.add(block)
+        sprites.append(block)
+    return sprites
   
-  # Updates all blocks
-  def update(self):
-    global SCN
-    self.sprites.draw(SCN)
-    self.sprites.update()
-
 # Block
 class Block(pygame.sprite.Sprite):
-  def __init__(self, row, col, image_path='grass.png'):
+  def __init__(self, row, col, image_path=Tile.GRASS):
     global BLOCK_SZ
     super(Block, self).__init__()
     
@@ -255,10 +285,6 @@ CLK = pygame.time.Clock()
 # Initialize game
 game = Game()
 
-PK = ParkourKing()
-test = pygame.sprite.Group()
-test.add(PK)
-
 # Game loop
 while running:
   for event in pygame.event.get():
@@ -266,11 +292,11 @@ while running:
       running = False
     elif event.type == pygame.KEYDOWN:
       if event.key == pygame.K_w:
-        PK.move(Move.JMP)
+        game.PK.move(Move.JMP)
       elif event.key == pygame.K_s:
-        PK.move(Move.SLD)
+        game.PK.move(Move.SLD)
       elif event.key == pygame.K_SPACE:
-        PK.move(Move.ATK)
+        game.PK.move(Move.ATK)
 
   # Displaying
   SCN.fill(Color.GREY)  
