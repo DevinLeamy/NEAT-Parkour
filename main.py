@@ -40,6 +40,10 @@ class ParkourKing(pygame.sprite.Sprite):
     super(ParkourKing, self).__init__()
     self.updates_per_frame = 5.0 # Num of update before frame change
     self.frame_increment = 1 / self.updates_per_frame 
+
+    # Position
+    self.LEFT_BUFFER = 3
+    self.head_row = Level.GRND - 2 # Two blocks above ground level
         
     # Id and frame count
     self.attacks = {1: 5, 2: 6, 3: 6}
@@ -57,7 +61,9 @@ class ParkourKing(pygame.sprite.Sprite):
     self.image = pygame.image.load(self.get_run_frame(0, 0))
     self.scale_image()
     self.rect = self.image.get_rect()
-    self.rect.topleft = [60, 60]
+
+    # Set position
+    self.rect.topleft = [self.LEFT_BUFFER * BLOCK_SZ, self.head_row * BLOCK_SZ]
     
     # On the ground and not in motion
     self.animating = Move.RUN
@@ -123,11 +129,10 @@ class ParkourKing(pygame.sprite.Sprite):
   
   # Scale image
   def scale_image(self):
-    global BLOCK_SZ
     width, height = self.image.get_size()
-#     self.image = pygame.transform.scale(self.image, (int(BLOCK_SZ), int(BLOCK_SZ / width * height)))
-#     self.image = pygame.transform.scale(self.image, (int(BLOCK_SZ), int(BLOCK_SZ)))
-    self.image = pygame.transform.scale(self.image, (100, 200))
+    new_height = int(2 * BLOCK_SZ)
+    new_width = int(width * (new_height / height))
+    self.image = pygame.transform.scale(self.image, (new_width, new_height))
     
   # Set sprite image
   def set_image(self):
@@ -198,7 +203,6 @@ class Game:
 
   # Draw game state
   def draw(self):
-    global SCN
     # Create sprite group
     sprites = pygame.sprite.Group()
 
@@ -217,8 +221,6 @@ class Game:
 # Map
 class Map:
   def __init__(self):
-    global BLOCKS, BLOCK_SZ
-
     # Set buffer
     self.BUFFER = 5
     self.BUFFER_SZ = self.BUFFER * BLOCK_SZ
@@ -251,7 +253,6 @@ class Map:
       for block in row:
         block.shift()
     
-    global BLOCK_SZ
     if self.total_shift == BLOCK_SZ:
       # Reset block shifts and remove left-most row
       for row in self.grid:
@@ -283,11 +284,9 @@ class Map:
       image = Tile.DIRT
       if row[0].row == 8:
         image = Tile.GRASS
-      global BLOCKS
       row.extend([Block(row[0].row, BLOCKS + i, image) for i in range(self.BUFFER)])
 
       # Number of elements in a row, after gen, is fixed
-      global BLOCKS
       assert(len(row) == BLOCKS + self.BUFFER)
 
     self.current_buffer = self.BUFFER_SZ
@@ -299,7 +298,6 @@ class Block(pygame.sprite.Sprite):
     self.row = row 
     self.col = col
     
-    global BLOCK_SZ
     super(Block, self).__init__()
     
     # Set sprite image
@@ -311,7 +309,6 @@ class Block(pygame.sprite.Sprite):
   
   # Decrease col 
   def decrease_col(self):
-    global BLOCK_SZ
     self.col -= 1
     self.rect.topleft = [self.col * BLOCK_SZ, self.row * BLOCK_SZ]
 
