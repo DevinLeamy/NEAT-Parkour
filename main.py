@@ -37,6 +37,8 @@ class Color():
 class Tile():
   GRASS = "TileSet2/Tiles/GrassMid.png"
   DIRT = "TileSet2/Tiles/Dirt.png"
+  WALL = "TileSet/Objects/Crate.png"
+  HARD = "TileSet/Tiles/stone.png"
 
 # Player 
 class ParkourKing(pygame.sprite.Sprite):
@@ -62,7 +64,7 @@ class ParkourKing(pygame.sprite.Sprite):
     self.get_slide_frame = lambda id, frame: "Adventurer/Sprites/adventurer-slide-0%d.png" % (frame)
     
     # Set image defaults
-    self.image = LOAD.load_image(self.get_run_frame(0, 0))
+    self.image = LOAD.load_image(self.get_run_frame(0, 0), False)
     self.scale_image()
     self.rect = self.image.get_rect()
 
@@ -157,7 +159,7 @@ class ParkourKing(pygame.sprite.Sprite):
   # Set sprite image
   def set_image(self):
     path = self.get_image_path()
-    self.image = LOAD.load_image(path)
+    self.image = LOAD.load_image(path, False)
     self.scale_image()
     
   # Displays player
@@ -328,7 +330,7 @@ class Map:
   # Generate new buffer
   def generate_buffer(self):
     # Add buffer to back
-    for row in self.grid:
+    for row in self.grid[:-2]: # Obstacles are generated seperately
       image = Tile.DIRT
       if row[0].row == Level.GRND:
         image = Tile.GRASS
@@ -336,6 +338,33 @@ class Map:
 
       # Number of elements in a row, after gen, is fixed
       assert(len(row) == BLOCKS + self.BUFFER)
+    
+    # Make the number of obstacles a choice?
+    pos = random.choice(range(2, self.BUFFER + 1))
+    ob_type = random.choice(range(1, 3)) 
+    
+    # Obstacle row buffers
+    top_row_ext = []
+    btm_row_ext = []
+    for i in range(5):
+      if i != pos:
+        top_row_ext.append(Air(Level.GRND - 2, BLOCKS + i))
+        btm_row_ext.append(Air(Level.GRND - 1, BLOCKS + i))
+        continue
+
+      if ob_type == 2:
+        top_row_ext.append(WallBlock(Level.GRND - 2, BLOCKS + i))
+        btm_row_ext.append(WallBlock(Level.GRND - 1, BLOCKS + i))
+      else:
+        top_row_ext.append(Air(Level.GRND - 2, BLOCKS + i))
+        btm_row_ext.append(HardBlock(Level.GRND - 1, BLOCKS + i))
+    
+    # Add obstacles
+    self.grid[-2].extend(btm_row_ext)
+    self.grid[-1].extend(top_row_ext)
+
+    assert len(self.grid[-1]) == BLOCKS + self.BUFFER
+    assert len(self.grid[-2]) == BLOCKS + self.BUFFER
 
     self.current_buffer = self.BUFFER_SZ
   
@@ -381,7 +410,7 @@ class Air(Block):
 
 # Wall block
 class WallBlock(Block):
-  def __init__(self, row, col, image_path=Tile.GRASS):
+  def __init__(self, row, col, image_path=Tile.WALL):
     super().__init__(row, col, image_path)
     self.broken = False
   
@@ -396,7 +425,7 @@ class WallBlock(Block):
 
 # Hard block
 class HardBlock(Block):
-  def __init__(self, row, col, image_path=Tile.GRASS):
+  def __init__(self, row, col, image_path=Tile.HARD):
     super().__init__(row, col, image_path)
   
   def collide(self):
@@ -421,7 +450,7 @@ while running:
         game.PK.move(Move.ATK)
 
   # Displaying
-  SCN.fill(Color.GREY)  
+  SCN.blit(LOAD.load_image("TileSet2/Background/Background.png"), (0, 0))
   game.update()
   pygame.display.update()
   pygame.display.flip()
