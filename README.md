@@ -1,4 +1,5 @@
-## TODO (by the end of April 26th):
-- Load all images at once
-- Add other kinds of blocks to scene
+## TODO: 
+- Add other kinds of blocks to scene 
 - Add score
+- Create /Assets folder for all images
+- Add background image to scene

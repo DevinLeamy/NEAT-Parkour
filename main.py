@@ -13,6 +13,7 @@ BLOCKS = 20
 BLOCK_SZ = W / BLOCKS
 SCN = pygame.display.set_mode((W, H))
 LOAD = ImageLoader()
+DELAY = 20
 
 # Pygame init
 pygame.display.flip()
@@ -342,7 +343,6 @@ class HardBlock(Block):
     return True
 
 running = True
-CLK = pygame.time.Clock()
 
 # Initialize game
 game = Game()
@@ -366,7 +366,6 @@ while running:
   pygame.display.update()
   pygame.display.flip()
   
-  # Clock delay
-  # CLK.tick(60)
-  pygame.time.delay(20)
+  # Set speed
+  pygame.time.delay(DELAY)
 pygame.display.quit()
