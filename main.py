@@ -265,7 +265,31 @@ class Map:
       for j in range(BLOCKS + self.BUFFER):
         row.append(Block(i, j, Tile.DIRT))  
       self.grid.append(row)
+    
+    # Add obstacles blocks
+    btm_row = list()
+    top_row = list()
+    for i in range(BLOCKS + self.BUFFER):
+      if i % 5 != 0:
+        top_row.append(Air(Level.GRND - 2, i))
+        btm_row.append(Air(Level.GRND - 1, i))
+        continue
 
+      height = random.choice([1, 2])
+      if height == 2:
+        top_row.append(WallBlock(Level.GRND - 2, i))
+        btm_row.append(WallBlock(Level.GRND - 1, i))
+      else:
+        top_row.append(Air(Level.GRND - 2, i))
+        btm_row.append(HardBlock(Level.GRND - 1, i))
+    
+    assert len(btm_row) == BLOCKS + self.BUFFER
+    assert len(top_row) == BLOCKS + self.BUFFER
+
+    # Add obstacles
+    self.grid.append(btm_row)
+    self.grid.append(top_row)
+      
   # Update blocks
   def update(self):
     self.current_buffer -= Block.SHIFT_SZ
@@ -295,6 +319,9 @@ class Map:
     sprites = list()
     for row in self.grid:
       for block in row:
+        # Check if block is empty
+        if isinstance(block, Air):
+          continue
         sprites.append(block)
     return sprites
   
@@ -337,9 +364,25 @@ class Block(pygame.sprite.Sprite):
   def shift(self):
     self.rect = self.rect.move(-1 * self.SHIFT_SZ, 0)
 
+# Air block
+class Air(Block):
+  def __init__(self, row, col):
+    self.row = row
+    self.col = col
+  
+  # Override Block methods
+  # Decrease col
+  def decrease_col(self):
+    self.col -= 1 
+
+  # Do nothing 
+  def shift(self):
+    return 
+
 # Wall block
 class WallBlock(Block):
-  def __init__(self):
+  def __init__(self, row, col, image_path=Tile.GRASS):
+    super().__init__(row, col, image_path)
     self.broken = False
   
   def break_block(self):
@@ -353,8 +396,8 @@ class WallBlock(Block):
 
 # Hard block
 class HardBlock(Block):
-  def __init__(self):
-    pass
+  def __init__(self, row, col, image_path=Tile.GRASS):
+    super().__init__(row, col, image_path)
   
   def collide(self):
     return True
