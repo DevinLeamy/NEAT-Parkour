@@ -223,25 +223,34 @@ class Game:
 # Map
 class Map:
   def __init__(self):
-    global BLOCKS
+    global BLOCKS, BLOCK_SZ
+
+    self.BUFFER = 5
+    self.BUFFER_SZ = self.BUFFER * BLOCK_SZ
+
+    self.current_buffer = self.BUFFER_SZ
 
     # Create map (STATIC MAP - REMOVE)
     self.grid = []
     row = list()
-    for i in range(BLOCKS):
-      row.append(Block(i, 8, Tile.GRASS))
+    for i in range(BLOCKS + self.BUFFER):
+      row.append(Block(8, i, Tile.GRASS))
     self.grid.append(row)
-    for i in range(BLOCKS):
+
+    for i in range(9, BLOCKS):
       row = list()
-      for j in range(1, BLOCKS - 9):
-        row.append(Block(i, j + 8, Tile.DIRT))
+      for j in range(BLOCKS + self.BUFFER):
+        row.append(Block(i, j, Tile.DIRT))  
       self.grid.append(row)
 
   # Update blocks
   def update(self):
+    self.current_buffer -= Block.SHIFT_SZ
     for row in self.grid:
       for block in row:
         block.shift()
+    if (self.current_buffer == 0):
+      self.generate_buffer()
 
   # Returns block sprites
   def get_sprites(self):
@@ -251,12 +260,31 @@ class Map:
         sprites.append(block)
     return sprites
   
+  # Generate new buffer
+  # REFACTOR THIS!!
+  def generate_buffer(self):
+    new_grid = []
+    # Remove buffer from front
+    for row in self.grid:
+      new_grid.append(row[5:])
+    
+    # Add buffer to back
+    for row in new_grid:
+      image = Tile.DIRT
+      if row[0].row == 8:
+        image = Tile.GRASS
+      global BLOCKS
+      row.extend([Block(row[0].row, BLOCKS + i, image) for i in range(self.BUFFER)])
+    self.grid = new_grid
+
+    self.current_buffer = self.BUFFER_SZ
+  
 # Block
 class Block(pygame.sprite.Sprite):
+  SHIFT_SZ = 5
   def __init__(self, row, col, image_path=Tile.GRASS):
-    self.row = row
+    self.row = row 
     self.col = col
-    self.shift_sz = 5 # Make a function of constants?
     
     global BLOCK_SZ
     super(Block, self).__init__()
@@ -266,11 +294,11 @@ class Block(pygame.sprite.Sprite):
     self.image = pygame.transform.scale(self.image, (50, 50))
     # Scale image to BLOCK_SZ X BLOCK_SZ
     self.rect = self.image.get_rect()
-    self.rect.topleft = [self.row * BLOCK_SZ, self.col * BLOCK_SZ]
+    self.rect.topleft = [self.col * BLOCK_SZ, self.row * BLOCK_SZ]
   
-  # Shift block right
+  # Shift block left 
   def shift(self):
-    self.rect = self.rect.move(-1 * self.shift_sz, 0)
+    self.rect = self.rect.move(-1 * self.SHIFT_SZ, 0)
 
 # Wall block
 class WallBlock(Block, ):
@@ -320,6 +348,6 @@ while running:
   pygame.display.flip()
   
   # Clock delay
-#   CLK.tick(60)
+  # CLK.tick(60)
   pygame.time.delay(20)
 pygame.display.quit()
