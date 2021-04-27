@@ -1,17 +1,20 @@
 # Teaching Parkour... The Darwin Way
 import random
 import pygame 
+from image_loader import ImageLoader
 pygame.init()
 
 pygame.display.init()
 
-# Create game window
+# Constants
 W = 1000
 H = 800
 BLOCKS = 20
 BLOCK_SZ = W / BLOCKS
-
 SCN = pygame.display.set_mode((W, H))
+LOAD = ImageLoader()
+
+# Pygame init
 pygame.display.flip()
 pygame.display.set_caption("Teaching Parkour... The Darwin Way")
 
@@ -49,7 +52,7 @@ class ParkourKing(pygame.sprite.Sprite):
     self.attacks = {1: 5, 2: 6, 3: 6}
     self.jumps = {1: 4}    
     self.runs = {1: 6}
-    self.slides = {1: 2}
+    self.slides = {1: 4}
     
     # Generate image path
     self.get_attack_frame = lambda id, frame: "Adventurer/Sprites/adventurer-attack%d-0%d.png" % (id, frame)
@@ -58,7 +61,7 @@ class ParkourKing(pygame.sprite.Sprite):
     self.get_slide_frame = lambda id, frame: "Adventurer/Sprites/adventurer-slide-0%d.png" % (frame)
     
     # Set image defaults
-    self.image = pygame.image.load(self.get_run_frame(0, 0))
+    self.image = LOAD.load_image(self.get_run_frame(0, 0))
     self.scale_image()
     self.rect = self.image.get_rect()
 
@@ -137,7 +140,7 @@ class ParkourKing(pygame.sprite.Sprite):
   # Set sprite image
   def set_image(self):
     path = self.get_image_path()
-    self.image = pygame.image.load(path)
+    self.image = LOAD.load_image(path)
     self.scale_image()
     
   # Displays player
@@ -301,7 +304,7 @@ class Block(pygame.sprite.Sprite):
     super(Block, self).__init__()
     
     # Set sprite image
-    self.image = pygame.image.load(image_path)
+    self.image = LOAD.load_image(image_path)
     self.image = pygame.transform.scale(self.image, (50, 50))
     # Scale image to BLOCK_SZ X BLOCK_SZ
     self.rect = self.image.get_rect()
