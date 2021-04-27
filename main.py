@@ -1,16 +1,3 @@
-# TODO (by the end of April 26th):
-# Port everything over to a python file
-# Create Github Repo for project
-# Display blocks
-# Add textures to blocks
-# Display player image in grid
-# Attack, jump, run and slide animations (DONE)
-# Player control (DONE)
-# Death animation
-# Idle animation (DONE)
-# Load all images at once
-
-
 # Teaching Parkour... The Darwin Way
 from enum import Enum
 import random
@@ -41,14 +28,14 @@ class Move(Enum):
   SLD = 2
   ATK = 3
 
-class Game:
-  pass
-
-# Do we want infinite slide? Or finite?
+class Color():
+  BLACK = (0, 0, 0)
+  WHITE = (255, 255, 255)
+  GREY = (230, 230, 230)
 
 # Player 
 class ParkourKing(pygame.sprite.Sprite):
-  def __init__(self, width, height):
+  def __init__(self):
     super(ParkourKing, self).__init__()
     self.updates_per_frame = 5.0 # Num of update before frame change
     self.frame_increment = 1 / self.updates_per_frame 
@@ -194,16 +181,54 @@ class ParkourKing(pygame.sprite.Sprite):
     self.set_image()
     self.update_current_frame()
 
-# Map 
+# Game  
+class Game:
+  def __init__(self):
+    # Create player sprite
+    self.PK = ParkourKing()
+    self.player = pygame.sprite.Group() 
+    self.player.add(self.PK)
+    self.game_map = Map()
+  
+  # Updates all game sprites
+  def update(self):
+    global SCN
+    self.player.draw(SCN)
+    self.player.update()
+    self.game_map.update()
+
+# Map
 class Map:
-  pass
+  def __init__(self):
+    global BLOCKS
+    # Create map
+    self.grid = [[Block(i, j) for i in range(BLOCKS)] for j in range(BLOCKS)] # Static map, to be removed
+    self.sprites = pygame.sprite.Group()
+    for row in self.grid:
+      for block in row:
+        self.sprites.add(block)
+  
+  # Updates all blocks
+  def update(self):
+    global SCN
+    self.sprites.draw(SCN)
+    self.sprites.update()
 
 # Block
-class Block:
-  pass
+class Block(pygame.sprite.Sprite):
+  def __init__(self, row, col, image_path='grass.png'):
+    global BLOCK_SZ
+    super(Block, self).__init__()
+    
+    # Set sprite image
+    self.image = pygame.image.load(image_path)
+    self.image = pygame.transform.scale(self.image, (50, 50))
+    # Scale image to BLOCK_SZ X BLOCK_SZ
+    self.rect = self.image.get_rect()
+    self.rect.topleft = [row * BLOCK_SZ, col * BLOCK_SZ]
 
 # Wall block
-class WallBlock(Block):
+class WallBlock(Block, ):
   def __init__(self):
     self.broken = False
   
@@ -227,9 +252,12 @@ class HardBlock(Block):
 running = True
 CLK = pygame.time.Clock()
 
-PK = ParkourKing(40, 40)
-sprites = pygame.sprite.Group() # For testing, remove
-sprites.add(PK)
+# Initialize game
+game = Game()
+
+PK = ParkourKing()
+test = pygame.sprite.Group()
+test.add(PK)
 
 # Game loop
 while running:
@@ -245,9 +273,8 @@ while running:
         PK.move(Move.ATK)
 
   # Displaying
-  SCN.fill((0, 0, 0)) # Make color constants
-  sprites.draw(SCN)
-  sprites.update()
+  SCN.fill(Color.GREY)  
+  game.update()
   pygame.display.update()
   pygame.display.flip()
   
