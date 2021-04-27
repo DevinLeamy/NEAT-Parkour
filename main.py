@@ -98,6 +98,22 @@ class ParkourKing(pygame.sprite.Sprite):
     self.current_frame = 0.0
     self.animation_id = random.choice(list(self.slides.keys()))
 
+  # Shift player up an down
+  def shift(self, up=True):
+    if not self.animating == Move.JMP:
+      return
+    
+    total_updates = self.updates_per_frame * self.jumps[self.animation_id]
+    dist_shift = BLOCK_SZ / float(total_updates)
+    row_shift = 1 / float(total_updates)
+    
+    if up:
+      self.rect = self.rect.move(0, -1 * dist_shift)
+      self.head_row += -1 * row_shift
+    else:
+      self.rect = self.rect.move(0, dist_shift)
+      self.head_row += row_shift
+ 
   # Attack
   def attack(self):
     if not (self.animating == Move.RUN):
@@ -156,6 +172,7 @@ class ParkourKing(pygame.sprite.Sprite):
       self.current_frame %= self.runs[self.animation_id]
     elif (self.animating == Move.JMP):
       self.current_frame %= self.jumps[self.animation_id]
+      self.shift()
     elif (self.animating == Move.SLD):
       self.current_frame %= self.slides[self.animation_id]
     elif (self.animating == Move.ATK):
@@ -321,7 +338,7 @@ class Block(pygame.sprite.Sprite):
     self.rect = self.rect.move(-1 * self.SHIFT_SZ, 0)
 
 # Wall block
-class WallBlock(Block, ):
+class WallBlock(Block):
   def __init__(self):
     self.broken = False
   

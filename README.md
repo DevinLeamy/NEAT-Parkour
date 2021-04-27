@@ -3,3 +3,4 @@
 - Add score
 - Create /Assets folder for all images
 - Add background image to scene
+- Allow player to jump
