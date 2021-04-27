@@ -196,8 +196,9 @@ class Game:
   
   # Updates all game sprites
   def update(self):
-    # Update player
+    # Update player and map
     self.PK.update()
+    self.game_map.update()
 
     self.draw()
 
@@ -236,6 +237,12 @@ class Map:
         row.append(Block(i, j + 8, Tile.DIRT))
       self.grid.append(row)
 
+  # Update blocks
+  def update(self):
+    for row in self.grid:
+      for block in row:
+        block.shift()
+
   # Returns block sprites
   def get_sprites(self):
     sprites = list()
@@ -247,6 +254,10 @@ class Map:
 # Block
 class Block(pygame.sprite.Sprite):
   def __init__(self, row, col, image_path=Tile.GRASS):
+    self.row = row
+    self.col = col
+    self.shift_sz = 5 # Make a function of constants?
+    
     global BLOCK_SZ
     super(Block, self).__init__()
     
@@ -255,7 +266,11 @@ class Block(pygame.sprite.Sprite):
     self.image = pygame.transform.scale(self.image, (50, 50))
     # Scale image to BLOCK_SZ X BLOCK_SZ
     self.rect = self.image.get_rect()
-    self.rect.topleft = [row * BLOCK_SZ, col * BLOCK_SZ]
+    self.rect.topleft = [self.row * BLOCK_SZ, self.col * BLOCK_SZ]
+  
+  # Shift block right
+  def shift(self):
+    self.rect = self.rect.move(-1 * self.shift_sz, 0)
 
 # Wall block
 class WallBlock(Block, ):
