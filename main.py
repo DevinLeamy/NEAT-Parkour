@@ -1,5 +1,4 @@
 # Teaching Parkour... The Darwin Way
-from enum import Enum
 import random
 import pygame 
 pygame.init()
@@ -17,12 +16,10 @@ pygame.display.flip()
 pygame.display.set_caption("Teaching Parkour... The Darwin Way")
 
 # Enums
-class Level(Enum):
-  GRND = 0
-  MID = 1
-  AIR = 2
+class Level():
+  GRND = 8 
   
-class Move(Enum):
+class Move():
   RUN = 0
   JMP = 1
   SLD = 2
@@ -63,7 +60,6 @@ class ParkourKing(pygame.sprite.Sprite):
     self.rect.topleft = [60, 60]
     
     # On the ground and not in motion
-    self.level = Level.GRND
     self.animating = Move.RUN
     
     # Current animation frame
@@ -78,7 +74,6 @@ class ParkourKing(pygame.sprite.Sprite):
       return
     
     # Begins jumping
-    self.level = Level.AIR
     self.animating = Move.JMP
     self.current_frame = 0.0
     self.animation_id = random.choice(list(self.jumps.keys()))
@@ -89,7 +84,6 @@ class ParkourKing(pygame.sprite.Sprite):
       return
     
     # Begins sliding
-    self.level = Level.GRND
     self.animating = Move.SLD
     self.current_frame = 0.0
     self.animation_id = random.choice(list(self.slides.keys()))
@@ -225,19 +219,25 @@ class Map:
   def __init__(self):
     global BLOCKS, BLOCK_SZ
 
+    # Set buffer
     self.BUFFER = 5
     self.BUFFER_SZ = self.BUFFER * BLOCK_SZ
-
     self.current_buffer = self.BUFFER_SZ
+    self.total_shift = 0
 
+    self.grid = []
+    self.initialize_map()
+
+  # Create initial map config
+  def initialize_map(self):
     # Create map (STATIC MAP - REMOVE)
     self.grid = []
     row = list()
     for i in range(BLOCKS + self.BUFFER):
-      row.append(Block(8, i, Tile.GRASS))
+      row.append(Block(Level.GRND, i, Tile.GRASS))
     self.grid.append(row)
 
-    for i in range(9, BLOCKS):
+    for i in range(Level.GRND + 1, BLOCKS):
       row = list()
       for j in range(BLOCKS + self.BUFFER):
         row.append(Block(i, j, Tile.DIRT))  
@@ -246,10 +246,26 @@ class Map:
   # Update blocks
   def update(self):
     self.current_buffer -= Block.SHIFT_SZ
+    self.total_shift += Block.SHIFT_SZ
     for row in self.grid:
       for block in row:
         block.shift()
-    if (self.current_buffer == 0):
+    
+    global BLOCK_SZ
+    if self.total_shift == BLOCK_SZ:
+      # Reset block shifts and remove left-most row
+      for row in self.grid:
+        # Col of first element should be 0
+        assert(row[0].col == 0)
+        row.pop(0)
+      for row in self.grid:
+        for block in row:
+          block.decrease_col()  
+      
+      # Reset total shift
+      self.total_shift = 0
+
+    if self.current_buffer == 0:
       self.generate_buffer()
 
   # Returns block sprites
@@ -261,21 +277,18 @@ class Map:
     return sprites
   
   # Generate new buffer
-  # REFACTOR THIS!!
   def generate_buffer(self):
-    new_grid = []
-    # Remove buffer from front
-    for row in self.grid:
-      new_grid.append(row[5:])
-    
     # Add buffer to back
-    for row in new_grid:
+    for row in self.grid:
       image = Tile.DIRT
       if row[0].row == 8:
         image = Tile.GRASS
       global BLOCKS
       row.extend([Block(row[0].row, BLOCKS + i, image) for i in range(self.BUFFER)])
-    self.grid = new_grid
+
+      # Number of elements in a row, after gen, is fixed
+      global BLOCKS
+      assert(len(row) == BLOCKS + self.BUFFER)
 
     self.current_buffer = self.BUFFER_SZ
   
@@ -296,6 +309,12 @@ class Block(pygame.sprite.Sprite):
     self.rect = self.image.get_rect()
     self.rect.topleft = [self.col * BLOCK_SZ, self.row * BLOCK_SZ]
   
+  # Decrease col 
+  def decrease_col(self):
+    global BLOCK_SZ
+    self.col -= 1
+    self.rect.topleft = [self.col * BLOCK_SZ, self.row * BLOCK_SZ]
+
   # Shift block left 
   def shift(self):
     self.rect = self.rect.move(-1 * self.SHIFT_SZ, 0)
