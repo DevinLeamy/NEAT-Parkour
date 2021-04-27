@@ -1,17 +1,17 @@
 ## TODO (by the end of April 26th):
-1. Port everything over to a python file (DONE)
-2. Create Github Repo for project (DONE) 
-3. (1) Display static blocks (DONE)
-3. (2) Display moving blocks (DONE)
-3. (3) Generate move blocks 
-4. Add textures to blocks (DONE)
-5. Display player image in grid
-6. Attack, jump, run and slide animations (DONE)
-7. Player control (DONE)
-8. Death animation
-9. Idle animation (DONE)
-10. Load all images at once
-11. Remove Level enum 
-12. Scale player in terms of blocks
-13. Add ground level
+- Port everything over to a python file (DONE)
+- Create Github Repo for project (DONE) 
+- (1) Display static blocks (DONE)
+- (2) Display moving blocks (DONE)
+- (3) Generate move blocks 
+- Add textures to blocks (DONE)
+- Display player image in grid
+- Attack, jump, run and slide animations (DONE)
+- Player control (DONE)
+- Death animation
+- Idle animation (DONE)
+- Load all images at once
+- Remove Level enum 
+- Scale player in terms of blocks
+- Add ground level
 
