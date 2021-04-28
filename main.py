@@ -117,6 +117,7 @@ class ParkourKing(pygame.sprite.Sprite):
       return
     
     # Begins sliding
+    self.head_row += 1
     self.animating = Move.SLD
     self.current_frame = 0.0
     self.animation_id = random.choice(list(self.slides.keys()))
@@ -138,7 +139,7 @@ class ParkourKing(pygame.sprite.Sprite):
       # Shift downwards
       self.rect = self.rect.move(0, dist_shift)
       self.head_row += row_shift
- 
+    
   # Attack
   def attack(self):
     if not (self.animating == Move.RUN):
@@ -187,10 +188,6 @@ class ParkourKing(pygame.sprite.Sprite):
     self.image = LOAD.load_image(path, False)
     self.scale_image()
     
-  # Displays player
-  def display(self):
-    pass
-  
   # Update current frame 
   def update_current_frame(self):
     self.current_frame += self.frame_increment
@@ -222,17 +219,51 @@ class ParkourKing(pygame.sprite.Sprite):
       pass
     elif (move == Move.JMP):
       self.jump()
-    elif (move == Move.FALL): # For testing, remove
-      self.fall()
     elif (move == Move.SLD):
       self.slide()
     elif (move == Move.ATK):
       self.attack()
     else:
       raise ValueError("Specified move is undefined")
+  
+  # Check if player on ground
+  def on_ground(self, grid):
+    row = int(self.head_row)
+    print(row)
+    print(grid[row + 2][self.LEFT_BUFFER].groups())
+    if self.animating == Move.SLD:
+      # One tall 
+      if grid[row + 1][self.LEFT_BUFFER].solid or grid[row + 1][self.LEFT_BUFFER + 1].solid:
+        return True
+    else:
+      # Two tall 
+      if grid[row + 2][self.LEFT_BUFFER].solid or grid[row + 2][self.LEFT_BUFFER + 1].solid:
+
+        return True
+    return False
+
+  # Check for obstacle collisions
+  def colliding(self, grid):
+    row = int(self.head_row)
+    if self.animating == Move.SLD:
+      # Two wide
+      if grid[row][self.LEFT_BUFFER].solid or grid[row][self.LEFT_BUFFER + 1].solid:
+        return True
+    else:
+      # One wide
+      if grid[row][self.LEFT_BUFFER].solid or grid[row + 1][self.LEFT_BUFFER].solid:
+        return True 
+    return False
       
   # Update player state
-  def update(self):
+  def update(self, grid):
+    # Check for collisions -- AND CHECK FOR FALLING
+    if not self.on_ground(grid) and not self.animating == Move.JMP:
+      self.fall()
+    if self.colliding(grid):
+      # Terminate the game / Return a score? 
+      pass
+
     # Images
     self.set_image()
     self.update_current_frame()
@@ -249,7 +280,7 @@ class Game:
   # Updates all game sprites
   def update(self):
     # Update player and map
-    self.PK.update()
+    self.PK.update(self.game_map.grid)
     self.game_map.update()
 
     self.draw()
@@ -285,23 +316,31 @@ class Map:
 
   # Create initial map config
   def initialize_map(self):
+    # Grid cols 
+    cols = BLOCKS + self.BUFFER
     # Create map (STATIC MAP - REMOVE)
     self.grid = []
+
+    # Fill upper blocks with Air
+    for i in range(Level.GRND):
+      self.grid.append([Air(i, j) for j in range(cols)])
+
+    # Add ground blocks
     row = list()
-    for i in range(BLOCKS + self.BUFFER):
+    for i in range(cols):
       row.append(Block(Level.GRND, i, Tile.GRASS))
     self.grid.append(row)
 
     for i in range(Level.GRND + 1, BLOCKS):
       row = list()
-      for j in range(BLOCKS + self.BUFFER):
+      for j in range(cols):
         row.append(Block(i, j, Tile.DIRT))  
       self.grid.append(row)
     
     # Add obstacles blocks
     btm_row = list()
     top_row = list()
-    for i in range(BLOCKS + self.BUFFER):
+    for i in range(cols):
       if i % 5 != 0:
         top_row.append(Air(Level.GRND - 2, i))
         btm_row.append(Air(Level.GRND - 1, i))
@@ -319,12 +358,12 @@ class Map:
         top_row.append(HardBlock(Level.GRND - 2, i))
         btm_row.append(Air(Level.GRND - 1, i))
     
-    assert len(btm_row) == BLOCKS + self.BUFFER
-    assert len(top_row) == BLOCKS + self.BUFFER
-
     # Add obstacles
     self.grid.append(btm_row)
     self.grid.append(top_row)
+
+    for row in self.grid:
+      assert len(row) == cols
       
   # Update blocks
   def update(self):
@@ -363,16 +402,17 @@ class Map:
   
   # Generate new buffer
   def generate_buffer(self):
-    # Add buffer to back
-    for row in self.grid[:-2]: # Obstacles are generated seperately
+    # Add buffer to air blocks
+    for row in self.grid[:Level.GRND]:
+      row.extend([Air(row[0].row, BLOCKS + i) for i in range(self.BUFFER)])
+
+    # Add buffer to ground
+    for row in self.grid[Level.GRND:-2]: 
       image = Tile.DIRT
       if row[0].row == Level.GRND:
         image = Tile.GRASS
       row.extend([Block(row[0].row, BLOCKS + i, image) for i in range(self.BUFFER)])
 
-      # Number of elements in a row, after gen, is fixed
-      assert(len(row) == BLOCKS + self.BUFFER)
-    
     # Make the number of obstacles a choice?
     pos = random.choice(range(2, self.BUFFER + 1))
     ob = random.choice(OBSTACLES) 
@@ -380,7 +420,7 @@ class Map:
     # Obstacle row buffers
     top_row_ext = []
     btm_row_ext = []
-    for i in range(5):
+    for i in range(self.BUFFER):
       if i != pos:
         top_row_ext.append(Air(Level.GRND - 2, BLOCKS + i))
         btm_row_ext.append(Air(Level.GRND - 1, BLOCKS + i))
@@ -401,10 +441,11 @@ class Map:
     self.grid[-2].extend(btm_row_ext)
     self.grid[-1].extend(top_row_ext)
 
-    assert len(self.grid[-1]) == BLOCKS + self.BUFFER
-    assert len(self.grid[-2]) == BLOCKS + self.BUFFER
-
     self.current_buffer = self.BUFFER_SZ
+
+    # Test
+    for row in self.grid:
+      assert len(row) == BLOCKS + self.BUFFER
   
 # Block
 class Block(pygame.sprite.Sprite):
@@ -412,6 +453,9 @@ class Block(pygame.sprite.Sprite):
   def __init__(self, row, col, image_path=Tile.GRASS):
     self.row = row 
     self.col = col
+
+    self.solid = True 
+    self.can_break = False
     
     super(Block, self).__init__()
     
@@ -436,6 +480,9 @@ class Air(Block):
   def __init__(self, row, col):
     self.row = row
     self.col = col
+
+    self.solid = False 
+    self.can_break = False
   
   # Override Block methods
   # Decrease col
@@ -450,13 +497,16 @@ class Air(Block):
 class WallBlock(Block):
   def __init__(self, row, col, image_path=Tile.WALL):
     super().__init__(row, col, image_path)
-    self.broken = False
+    self.solid = True
+    self.can_break = True
   
+  # Breaks block
   def break_block(self):
-    self.broken = True
+    self.solid = False 
   
+  # Check for collision
   def collide(self):
-    if (self.broken):
+    if (self.solid):
       return True
     else:
       return False
@@ -465,6 +515,8 @@ class WallBlock(Block):
 class HardBlock(Block):
   def __init__(self, row, col, image_path=Tile.HARD):
     super().__init__(row, col, image_path)
+    self.can_break = False
+    self.solid = True
   
   def collide(self):
     return True
@@ -484,8 +536,6 @@ while running:
         game.PK.move(Move.JMP)
       elif event.key == pygame.K_s:
         game.PK.move(Move.SLD)
-      elif event.key == pygame.K_f: # For testing, remove
-        game.PK.move(Move.FALL)
       elif event.key == pygame.K_SPACE:
         game.PK.move(Move.ATK)
 
