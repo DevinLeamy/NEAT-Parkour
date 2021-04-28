@@ -28,6 +28,7 @@ class Move():
   JMP = 1
   SLD = 2
   ATK = 3
+  FALL = 4
 
 class Color():
   BLACK = (0, 0, 0)
@@ -54,12 +55,14 @@ class ParkourKing(pygame.sprite.Sprite):
     # Id and frame count
     self.attacks = {1: 5, 2: 6, 3: 6}
     self.jumps = {1: 4}    
+    self.falls = {1: 4}
     self.runs = {1: 6}
     self.slides = {1: 4}
     
     # Generate image path
     self.get_attack_frame = lambda id, frame: "Adventurer/Sprites/adventurer-attack%d-0%d.png" % (id, frame)
     self.get_jump_frame = lambda id, frame: "Adventurer/Sprites/adventurer-jump-0%d.png" % (frame)
+    self.get_fall_frame = lambda id, frame: "Adventurer/Sprites/adventurer-smrslt-0%d.png" % (frame)
     self.get_run_frame = lambda id, frame: "Adventurer/Sprites/adventurer-run-0%d.png" % (frame) 
     self.get_slide_frame = lambda id, frame: "Adventurer/Sprites/adventurer-slide-0%d.png" % (frame)
     
@@ -90,6 +93,17 @@ class ParkourKing(pygame.sprite.Sprite):
     self.current_frame = 0.0
     self.animation_id = random.choice(list(self.jumps.keys()))
 
+  # Fall
+  def fall(self):
+    # Already falling 
+    if self.animating == Move.FALL:
+      return 
+
+    # Begin falling
+    self.animating = Move.FALL
+    self.current_frame = 0.0
+    self.animation_id = random.choice(list(self.falls.keys()))
+
   # Slide
   def slide(self):
     if not (self.animating == Move.RUN):
@@ -101,18 +115,20 @@ class ParkourKing(pygame.sprite.Sprite):
     self.animation_id = random.choice(list(self.slides.keys()))
 
   # Shift player up an down
-  def shift(self, up=True):
-    if not self.animating == Move.JMP:
+  def shift(self):
+    if not self.animating == Move.JMP and not self.animating == Move.FALL:
       return
     
     total_updates = self.updates_per_frame * self.jumps[self.animation_id]
     dist_shift = BLOCK_SZ / float(total_updates)
     row_shift = 1 / float(total_updates)
     
-    if up:
+    if self.animating == Move.JMP:
+      # Shift upwards
       self.rect = self.rect.move(0, -1 * dist_shift)
       self.head_row += -1 * row_shift
     else:
+      # Shift downwards
       self.rect = self.rect.move(0, dist_shift)
       self.head_row += row_shift
  
@@ -144,6 +160,8 @@ class ParkourKing(pygame.sprite.Sprite):
       return self.get_attack_frame(self.animation_id, int(self.current_frame))
     elif (self.animating == Move.JMP):
       return self.get_jump_frame(self.animation_id, int(self.current_frame))
+    elif (self.animating == Move.FALL):
+      return self.get_fall_frame(self.animation_id, int(self.current_frame))
     elif (self.animating == Move.SLD):
       return self.get_slide_frame(self.animation_id, int(self.current_frame))
     else:
@@ -175,6 +193,9 @@ class ParkourKing(pygame.sprite.Sprite):
     elif (self.animating == Move.JMP):
       self.current_frame %= self.jumps[self.animation_id]
       self.shift()
+    elif (self.animating == Move.FALL):
+      self.current_frame %= self.falls[self.animation_id]
+      self.shift()
     elif (self.animating == Move.SLD):
       self.current_frame %= self.slides[self.animation_id]
     elif (self.animating == Move.ATK):
@@ -194,6 +215,8 @@ class ParkourKing(pygame.sprite.Sprite):
       pass
     elif (move == Move.JMP):
       self.jump()
+    elif (move == Move.FALL): # For testing, remove
+      self.fall()
     elif (move == Move.SLD):
       self.slide()
     elif (move == Move.ATK):
@@ -446,6 +469,8 @@ while running:
         game.PK.move(Move.JMP)
       elif event.key == pygame.K_s:
         game.PK.move(Move.SLD)
+      elif event.key == pygame.K_f: # For testing, remove
+        game.PK.move(Move.FALL)
       elif event.key == pygame.K_SPACE:
         game.PK.move(Move.ATK)
 
