@@ -14,3 +14,4 @@
 - Improve speed
 - Increase speed over time
 - Add score
+- Refactor map init and buffer gen

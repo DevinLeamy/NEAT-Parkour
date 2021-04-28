@@ -233,8 +233,8 @@ class ParkourKing(pygame.sprite.Sprite):
     # return True
     row = int(self.head_row)
     # print(row)
-    print(type(grid[row + 2][self.LEFT_BUFFER]))
-    print(row)
+    # print(type(grid[row + 2][self.LEFT_BUFFER]))
+    # print(row)
     assert grid[row + 2][self.LEFT_BUFFER].row == row + 2 and grid[row + 2][self.LEFT_BUFFER].col == self.LEFT_BUFFER
     if self.animating == Move.SLD:
       # One tall 
@@ -317,67 +317,53 @@ class Map:
     self.current_buffer = self.BUFFER_SZ
     self.total_shift = 0
 
+    self.rows = BLOCKS + self.BUFFER
+    self.cols = BLOCKS
     self.grid = []
     self.initialize_map()
 
-  # Create initial map config
+  # Create initial map config - Requires refactor
   def initialize_map(self):
-    # Grid cols 
-    cols = BLOCKS + self.BUFFER
-    # Create map (STATIC MAP - REMOVE)
-    self.grid = []
+    # Fill with Air
+    self.grid = [[Air(i, j) for j in range(self.cols)] for i in range(self.rows)]
 
-    # Fill upper blocks with Air
-    for i in range(Level.GRND):
-      self.grid.append([Air(i, j) for j in range(cols)])
-
-    # Add ground blocks
-    row = list()
-    for i in range(cols):
-      row.append(Block(Level.GRND, i, Tile.GRASS))
-    self.grid.append(row)
-
-    for i in range(Level.GRND + 1, BLOCKS):
-      row = list()
-      for j in range(cols):
-        row.append(Block(i, j, Tile.DIRT))  
-      self.grid.append(row)
-    
-    # Add obstacles blocks
-    btm_row = list()
-    top_row = list()
-    for i in range(cols):
-      if i % 5 != 0:
-        top_row.append(Air(Level.GRND - 2, i))
-        btm_row.append(Air(Level.GRND - 1, i))
+    # Add obstacle blocks
+    for i in range(self.cols):
+      if not i % 5 == 0:
         continue
 
       ob = random.choice(OBSTACLES)
       if ob == Ob.WALL:
-        top_row.append(WallBlock(Level.GRND - 2, i))
-        btm_row.append(WallBlock(Level.GRND - 1, i))
+        self.grid[Level.GRND - 2][i] = WallBlock(Level.GRND - 2, i)
+        self.grid[Level.GRND - 1][i] = WallBlock(Level.GRND - 1, i)
       elif ob == Ob.BHARD:
-        top_row.append(Air(Level.GRND - 2, i))
-        btm_row.append(HardBlock(Level.GRND - 1, i))
+        self.grid[Level.GRND - 1][i] = HardBlock(Level.GRND - 1, i)
       else:
         assert ob == Ob.THARD
-        top_row.append(HardBlock(Level.GRND - 2, i))
-        btm_row.append(Air(Level.GRND - 1, i))
-    
-    # Add obstacles
-    self.grid.append(btm_row)
-    self.grid.append(top_row)
+        self.grid[Level.GRND - 2][i] = HardBlock(Level.GRND - 2, i)
+ 
+    # Add ground blocks
+    for i in range(self.cols):
+      self.grid[Level.GRND][i] = Block(Level.GRND, i, Tile.GRASS)
 
+    for i in range(Level.GRND + 1, self.rows):
+      for j in range(self.cols):
+        self.grid[i][j] = Block(i, j, Tile.DIRT)
+ 
+    # Tests
     for row in self.grid:
-      assert len(row) == cols
+      assert len(row) == self.cols
+    for i in range(BLOCKS):
+      for j in range(cols):
+        assert self.grid[i][j].row == i and self.grid[i][j].col == j
       
   # Update blocks
   def update(self):
     self.current_buffer -= Block.SHIFT_SZ
     self.total_shift += Block.SHIFT_SZ
-    for row in self.grid:
-      for block in row:
-        block.shift()
+    for i in range(self.rows):
+      for j in range(self.cols):
+        self.grid[i][j].shift()
     
     if self.total_shift == BLOCK_SZ:
       # Reset block shifts and remove left-most row
@@ -388,6 +374,10 @@ class Map:
       for row in self.grid:
         for block in row:
           block.decrease_col()  
+
+    for i in range(len(self.grid)):
+      for j in range(len(self.grid[0])):
+        assert self.grid[i][j].row == i and self.grid[i][j].col == j
       
       # Reset total shift
       self.total_shift = 0
@@ -406,52 +396,54 @@ class Map:
         sprites.append(block)
     return sprites
   
-  # Generate new buffer
+  # Generate new buffer - Requires refactor
   def generate_buffer(self):
-    # Add buffer to air blocks
-    for row in self.grid[:Level.GRND]:
-      row.extend([Air(row[0].row, BLOCKS + i) for i in range(self.BUFFER)])
+    rows = BLOCKS
+    new_cols = self.BUFFER
 
-    # Add buffer to ground
-    for row in self.grid[Level.GRND:-2]: 
-      image = Tile.DIRT
-      if row[0].row == Level.GRND:
-        image = Tile.GRASS
-      row.extend([Block(row[0].row, BLOCKS + i, image) for i in range(self.BUFFER)])
+    for i in range(rows):
+      if i < Level.GRND - 2:
+        self.grid[i].extend([Air(i, BLOCKS + j) for j in range(new_cols)])
+      elif i == Level.GRND - 2:
+        # Fill with Air
+        self.grid[i].extend([Air(i, BLOCKS + j) for j in range(new_cols)])
+        self.grid[i + 1].extend([Air(i + 1, BLOCKS + j) for j in range(new_cols)])
 
-    # Make the number of obstacles a choice?
-    pos = random.choice(range(2, self.BUFFER + 1))
-    ob = random.choice(OBSTACLES) 
+        # Make the number of obstacles a choice?
+        pos = random.choice(range(2, self.BUFFER + 1))
+        ob = random.choice(OBSTACLES) 
     
-    # Obstacle row buffers
-    top_row_ext = []
-    btm_row_ext = []
-    for i in range(self.BUFFER):
-      if i != pos:
-        top_row_ext.append(Air(Level.GRND - 2, BLOCKS + i))
-        btm_row_ext.append(Air(Level.GRND - 1, BLOCKS + i))
+        # Add row buffers
+        for j in range(new_cols):
+          if not j == pos:
+            continue
+
+          if ob == Ob.WALL:
+            self.grid[i][j] = WallBlock(i, BLOCKS + j)
+            self.grid[i + 1][j] = WallBlock(i + 1, BLOCKS + j)
+          elif ob == Ob.BHARD:
+            self.grid[i + 1][j] = HardBlock(i + 1, BLOCKS + j)
+          else:
+            assert ob == Ob.THARD
+            self.grid[i][j] = HardBlock(i, BLOCKS + j)
+        assert len(self.grid[i]) == BLOCKS + self.BUFFER and len(self.grid[i + 1]) == BLOCKS + self.BUFFER
+      elif i == Level.GRND - 1:
         continue
-
-      if ob == Ob.WALL:
-        top_row_ext.append(WallBlock(Level.GRND - 2, BLOCKS + i))
-        btm_row_ext.append(WallBlock(Level.GRND - 1, BLOCKS + i))
-      elif ob == Ob.BHARD:
-        top_row_ext.append(Air(Level.GRND - 2, BLOCKS + i))
-        btm_row_ext.append(HardBlock(Level.GRND - 1, BLOCKS + i))
+      elif i == Level.GRND:
+        self.grid[i].extend([Block(i, BLOCKS + j, Tile.GRASS) for j in range(new_cols)])
       else:
-        assert ob == Ob.THARD
-        top_row_ext.append(HardBlock(Level.GRND - 2, BLOCKS + i))
-        btm_row_ext.append(Air(Level.GRND - 1, BLOCKS + i))
-    
-    # Add obstacles
-    self.grid[-2].extend(btm_row_ext)
-    self.grid[-1].extend(top_row_ext)
-
+        self.grid[i].extend([Block(i, BLOCKS + j, Tile.DIRT) for j in range(new_cols)])
+   
+    # Reset buffer
     self.current_buffer = self.BUFFER_SZ
 
-    # Test
+    # Tests
     for row in self.grid:
+      print(len(row))
       assert len(row) == BLOCKS + self.BUFFER
+    for i in range(rows):
+      for j in range(BLOCKS + self.BUFFER):
+        assert self.grid[i][j].row == i and self.grid[i][j].col == j
   
 # Block
 class Block(pygame.sprite.Sprite):
