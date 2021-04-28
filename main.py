@@ -41,6 +41,13 @@ class Tile():
   WALL = "TileSet/Objects/Crate.png"
   HARD = "TileSet/Tiles/stone.png"
 
+class Ob():
+  WALL = 0
+  THARD = 1
+  BHARD = 2
+
+OBSTACLES = [Ob.WALL, Ob.THARD, Ob.BHARD]
+
 # Player 
 class ParkourKing(pygame.sprite.Sprite):
   def __init__(self):
@@ -57,7 +64,7 @@ class ParkourKing(pygame.sprite.Sprite):
     self.jumps = {1: 4}    
     self.falls = {1: 4}
     self.runs = {1: 6}
-    self.slides = {1: 4}
+    self.slides = {1: 6}
     
     # Generate image path
     self.get_attack_frame = lambda id, frame: "Adventurer/Sprites/adventurer-attack%d-0%d.png" % (id, frame)
@@ -300,13 +307,17 @@ class Map:
         btm_row.append(Air(Level.GRND - 1, i))
         continue
 
-      height = random.choice([1, 2])
-      if height == 2:
+      ob = random.choice(OBSTACLES)
+      if ob == Ob.WALL:
         top_row.append(WallBlock(Level.GRND - 2, i))
         btm_row.append(WallBlock(Level.GRND - 1, i))
-      else:
+      elif ob == Ob.BHARD:
         top_row.append(Air(Level.GRND - 2, i))
         btm_row.append(HardBlock(Level.GRND - 1, i))
+      else:
+        assert ob == Ob.THARD
+        top_row.append(HardBlock(Level.GRND - 2, i))
+        btm_row.append(Air(Level.GRND - 1, i))
     
     assert len(btm_row) == BLOCKS + self.BUFFER
     assert len(top_row) == BLOCKS + self.BUFFER
@@ -364,7 +375,7 @@ class Map:
     
     # Make the number of obstacles a choice?
     pos = random.choice(range(2, self.BUFFER + 1))
-    ob_type = random.choice(range(1, 3)) 
+    ob = random.choice(OBSTACLES) 
     
     # Obstacle row buffers
     top_row_ext = []
@@ -375,12 +386,16 @@ class Map:
         btm_row_ext.append(Air(Level.GRND - 1, BLOCKS + i))
         continue
 
-      if ob_type == 2:
+      if ob == Ob.WALL:
         top_row_ext.append(WallBlock(Level.GRND - 2, BLOCKS + i))
         btm_row_ext.append(WallBlock(Level.GRND - 1, BLOCKS + i))
-      else:
+      elif ob == Ob.BHARD:
         top_row_ext.append(Air(Level.GRND - 2, BLOCKS + i))
         btm_row_ext.append(HardBlock(Level.GRND - 1, BLOCKS + i))
+      else:
+        assert ob == Ob.THARD
+        top_row_ext.append(HardBlock(Level.GRND - 2, BLOCKS + i))
+        btm_row_ext.append(Air(Level.GRND - 1, BLOCKS + i))
     
     # Add obstacles
     self.grid[-2].extend(btm_row_ext)
