@@ -8,3 +8,9 @@
 - Really slow
 - Cannot stand on blocks
 - Will 'fall through' solid blocks
+
+# Today
+- Allow for standing on blocks
+- Improve speed
+- Increase speed over time
+- Add score

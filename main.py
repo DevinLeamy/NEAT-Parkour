@@ -210,6 +210,8 @@ class ParkourKing(pygame.sprite.Sprite):
     self.current_frame = round(self.current_frame, 2)
     # Animation is complete
     if self.current_frame == 0.0:
+      if (self.animating == Move.SLD):
+        self.head_row -= 1 # Player stands
       self.run()
 
   # Move
@@ -228,9 +230,12 @@ class ParkourKing(pygame.sprite.Sprite):
   
   # Check if player on ground
   def on_ground(self, grid):
+    # return True
     row = int(self.head_row)
+    # print(row)
+    print(type(grid[row + 2][self.LEFT_BUFFER]))
     print(row)
-    print(grid[row + 2][self.LEFT_BUFFER].groups())
+    assert grid[row + 2][self.LEFT_BUFFER].row == row + 2 and grid[row + 2][self.LEFT_BUFFER].col == self.LEFT_BUFFER
     if self.animating == Move.SLD:
       # One tall 
       if grid[row + 1][self.LEFT_BUFFER].solid or grid[row + 1][self.LEFT_BUFFER + 1].solid:
@@ -244,6 +249,7 @@ class ParkourKing(pygame.sprite.Sprite):
 
   # Check for obstacle collisions
   def colliding(self, grid):
+    return False
     row = int(self.head_row)
     if self.animating == Move.SLD:
       # Two wide
@@ -257,8 +263,8 @@ class ParkourKing(pygame.sprite.Sprite):
       
   # Update player state
   def update(self, grid):
-    # Check for collisions -- AND CHECK FOR FALLING
-    if not self.on_ground(grid) and not self.animating == Move.JMP:
+    # Check for collisions
+    if (not self.on_ground(grid)) and (not self.animating == Move.JMP):
       self.fall()
     if self.colliding(grid):
       # Terminate the game / Return a score? 
