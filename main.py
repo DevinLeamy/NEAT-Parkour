@@ -232,7 +232,6 @@ class ParkourKing(pygame.sprite.Sprite):
   def on_ground(self, grid):
     # return True
     row = int(self.head_row)
-    assert grid[row + 2][self.LEFT_BUFFER].row == row + 2 and grid[row + 2][self.LEFT_BUFFER].col == self.LEFT_BUFFER
     if self.animating == Move.SLD:
       # One tall 
       if grid[row + 1][self.LEFT_BUFFER].solid or grid[row + 1][self.LEFT_BUFFER + 1].solid:
@@ -335,7 +334,6 @@ class Map:
       elif ob == Ob.BHARD:
         self.grid[Level.GRND - 1][i] = HardBlock(Level.GRND - 1, i)
       else:
-        assert ob == Ob.THARD
         self.grid[Level.GRND - 2][i] = HardBlock(Level.GRND - 2, i)
  
     # Add ground blocks
@@ -346,13 +344,6 @@ class Map:
       for j in range(self.cols):
         self.grid[i][j] = Block(i, j, Tile.DIRT)
  
-    # Tests
-    for row in self.grid:
-      assert len(row) == self.cols
-    for i in range(BLOCKS):
-      for j in range(self.cols):
-        assert self.grid[i][j].row == i and self.grid[i][j].col == j
-      
   # Update blocks
   def update(self):
     self.current_buffer -= Block.SHIFT_SZ
@@ -368,15 +359,10 @@ class Map:
       # Reset block shifts and remove left-most row
       for i in range(self.rows):
         # Col of first element should be 0
-        assert(self.grid[i][0].col == 0)
         self.grid[i].pop(0)
       for i in range(self.rows):
         for j in range(len(self.grid[0])):
           self.grid[i][j].decrease_col()  
-
-    for i in range(len(self.grid)):
-      for j in range(len(self.grid[0])):
-        assert self.grid[i][j].row == i and self.grid[i][j].col == j
 
     if self.current_buffer == 0:
       self.generate_buffer()
@@ -398,27 +384,26 @@ class Map:
 
     for i in range(self.rows):
       self.grid[i].extend([Air(i, BLOCKS + j) for j in range(new_cols)])
-      print(len(self.grid[i]), len(self.grid))
+
+    for i in range(self.rows):
       if i < Level.GRND - 2:
         continue
       elif i == Level.GRND - 2:
         # Make the number of obstacles a choice?
-        pos = random.choice(range(2, self.BUFFER + 1))
+        pos = random.choice(range(2, self.BUFFER))
         ob = random.choice(OBSTACLES) 
-    
+        
         # Add row buffers
         for j in range(new_cols):
           if not j == pos:
             continue
 
-          print(i, BLOCKS + j)
           if ob == Ob.WALL:
             self.grid[i][BLOCKS + j] = WallBlock(i, BLOCKS + j)
             self.grid[i + 1][BLOCKS + j] = WallBlock(i + 1, BLOCKS + j)
           elif ob == Ob.BHARD:
             self.grid[i + 1][BLOCKS + j] = HardBlock(i + 1, BLOCKS + j)
           else:
-            assert ob == Ob.THARD
             self.grid[i][BLOCKS + j] = HardBlock(i, BLOCKS + j)
       elif i == Level.GRND - 1:
         continue
@@ -432,10 +417,6 @@ class Map:
     # Reset buffer
     self.current_buffer = self.BUFFER_SZ
 
-    for i in range(self.rows):
-      for j in range(self.cols):
-        assert self.grid[i][j].row == i and self.grid[i][j].col == j
-  
 # Block
 class Block(pygame.sprite.Sprite):
   SHIFT_SZ = 5

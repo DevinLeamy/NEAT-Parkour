@@ -7,13 +7,11 @@
 # Bugs
 - Really slow
 - Cannot stand on blocks
-- Will 'fall through' solid blocks
 
 # Today
 - Allow for standing on blocks
 - Improve speed
 - Increase speed over time
 - Add score
-- Refactor map init and buffer gen
 - Better organize tests
 - Seperate classes into seperate files
