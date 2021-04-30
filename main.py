@@ -105,6 +105,9 @@ class ParkourKing(pygame.sprite.Sprite):
     # Already falling 
     if self.animating == Move.FALL:
       return 
+    if self.animating == Move.SLD:
+      # Return to original height
+      self.head_row -= 1
 
     # Begin falling
     self.animating = Move.FALL
@@ -238,7 +241,7 @@ class ParkourKing(pygame.sprite.Sprite):
         return True
     else:
       # Two tall 
-      if grid[row + 2][self.LEFT_BUFFER].solid or grid[row + 2][self.LEFT_BUFFER + 1].solid:
+      if grid[row + 2][self.LEFT_BUFFER + 1].solid or grid[row + 2][self.LEFT_BUFFER + 2].solid:
 
         return True
     return False
