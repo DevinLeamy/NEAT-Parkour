@@ -1,5 +1,6 @@
-from main import LOAD, BLOCK_SZ, pygame
 from enums import Tile
+from config import *
+import pygame
 
 # Block
 class Block(pygame.sprite.Sprite):

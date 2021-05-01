@@ -1,4 +1,5 @@
-from main import BLOCK_SZ, LOAD, pygame
+from config import *
+import pygame
 import random
 from enums import Move, Level
 

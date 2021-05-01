@@ -1,17 +1,13 @@
 # Teaching Parkour... The Darwin Way
 import random
 import pygame 
+from config import *
 
 pygame.init()
 
 pygame.display.init()
 
 # Constants
-W = 1080
-H = 800
-BLOCKS = 18 
-BLOCK_SZ = int(W / BLOCKS)
-DELAY = 20
 SCN = pygame.display.set_mode((W, H))
 
 from image_loader import ImageLoader
@@ -23,11 +19,11 @@ from enums import Color, Move, Ob
 pygame.display.flip()
 pygame.display.set_caption("Teaching Parkour... The Darwin Way")
 
-OBSTACLES = [Ob.WALL, Ob.THARD, Ob.BHARD]
 running = True
 
 from player import ParkourKing
 from game_map import Map
+
 
 # Game  
 class Game:
@@ -68,6 +64,7 @@ class Game:
 # Initialize game
 game = Game()
 
+CLK = pygame.time.Clock()
 # Game loop
 while running:
   for event in pygame.event.get():
@@ -88,5 +85,6 @@ while running:
   pygame.display.flip()
   
   # Set speed
-  pygame.time.delay(DELAY)
+  CLK.tick(DELAY)
+  # pygame.time.delay(DELAY)
 pygame.display.quit()

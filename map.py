@@ -1,7 +1,5 @@
-from blocks import Block, HardBlock, WallBlock, Air
-import random
-from enums import Level, Tile, Ob
 from config import *
+from enums import Level, Tile
 
 # Map
 class Map:
