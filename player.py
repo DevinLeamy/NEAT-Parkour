@@ -13,11 +13,11 @@ class ParkourKing(pygame.sprite.Sprite):
     self.head_row = Level.GRND - 2 # Two blocks above ground level
         
     # Id: (frame-count, updates-per-frame)
-    self.attacks = {1: (5, 4.0), 2: (6, 4.0), 3: (6, 4.0)}
-    self.jumps = {1: (4, 4.0)}    
-    self.falls = {1: (4, 4.0)}
-    self.runs = {1: (6, 4.0)}
-    self.slides = {1: (6, 4.0)}
+    self.attacks = {1: (5, 4), 2: (6, 4), 3: (6, 4)}
+    self.jumps = {1: (4, 2)}    
+    self.falls = {1: (4, 2)}
+    self.runs = {1: (6, 4)}
+    self.slides = {1: (6, 4)}
     
     # Generate image path
     self.get_attack_frame = lambda id, frame: "Adventurer/Sprites/adventurer-attack%d-0%d.png" % (id, frame)
@@ -39,7 +39,7 @@ class ParkourKing(pygame.sprite.Sprite):
     
     # Current animation frame
     self.animation_id = random.choice(list(self.runs.keys()))
-    self.get_frame_increment = lambda updates_per_frame : 1 / self.updates_per_frame
+    self.get_frame_increment = lambda updates_per_frame : 1 / updates_per_frame
     self.current_frame = 0.0
     self.updates_per_frame = self.runs[self.animation_id][1]
 
@@ -142,20 +142,27 @@ class ParkourKing(pygame.sprite.Sprite):
     if self.animating == Move.JMP:
       total_updates *= self.jumps[self.animation_id][0]
     elif self.animating == Move.FALL:
-      total_updates *= self.falls[self.animation_id][0]
+      total_updates *= self.falls[self.animation_id][0] 
 
     dist_shift = BLOCK_SZ / float(total_updates)
     row_shift = 1 / float(total_updates)
-    
+
+    cur_height = self.rect.topleft[1] 
     if self.animating == Move.JMP:
       # Shift upwards
       self.rect = self.rect.move(0, -1 * dist_shift)
       self.head_row += -1 * row_shift
+      diff = abs(cur_height - self.rect.topleft[1])
+      if diff < dist_shift and self.rect.topleft[1] % BLOCK_SZ != 0:
+        self.rect = self.rect.move(0, -1)
     else:
       # Shift downwards
       self.rect = self.rect.move(0, dist_shift)
       self.head_row += row_shift
-    
+      diff = abs(cur_height - self.rect.topleft[1])
+      if diff < dist_shift and self.rect.topleft[1] % BLOCK_SZ != 0:
+        self.rect = self.rect.move(0, 1)
+
   # Update current frame 
   def update_current_frame(self):
     frame_increment = self.get_frame_increment(self.updates_per_frame)
@@ -177,8 +184,8 @@ class ParkourKing(pygame.sprite.Sprite):
       raise ValueError("Not animating a valid move")
     
     self.current_frame = round(self.current_frame, 2)
-    # Animation is complete
-    if self.current_frame == 0.0:
+    # Animation is complete || Extra or is a hacky solution to handle floating point errors
+    if self.current_frame == 0.0 or ((self.animating == Move.FALL or self.animating == Move.JMP) and self.rect.topleft[1] % BLOCK_SZ == 0):
       if (self.animating == Move.SLD):
         self.head_row -= 1 # Player stands
       self.run()
