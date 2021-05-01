@@ -25,8 +25,12 @@ from game_map import Map
 # Game  
 class Game:
   def __init__(self):
+    # Create sprite group
+    self.sprites = pygame.sprite.Group()
+
     # Add player sprite
     self.PK = ParkourKing()
+    self.sprites.add(self.PK)
 
     # Create map and add block sprites
     self.game_map = Map()
@@ -41,22 +45,13 @@ class Game:
 
   # Draw game state
   def draw(self):
-    # Create sprite group
-    sprites = pygame.sprite.Group()
-
-    # Add player sprite
-    sprites.add(self.PK)
-
     # Add block sprites 
     map_blocks = self.game_map.get_sprites()
     for block in map_blocks:
-      sprites.add(block)
+      self.sprites.add(block)
 
     # Draw sprites to screen
-    sprites.draw(SCN)
-
-
-
+    self.sprites.draw(SCN)
 
 # Initialize game
 game = Game()
