@@ -74,7 +74,6 @@ while running:
   SCN.blit(LOAD.load_image("TileSet2/Background/Background.png"), (0, 0))
   game.update()
   pygame.display.update()
-  pygame.display.flip()
   
   # Set speed
   CLK.tick(DELAY)

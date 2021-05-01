@@ -6,9 +6,7 @@
 - Make fall faster
 
 # Bugs
-- Really slow
 
 # Today
-- Improve speed
 - Increase speed over time
 - Add score
