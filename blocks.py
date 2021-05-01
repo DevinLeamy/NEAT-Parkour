@@ -10,7 +10,6 @@ class Block(pygame.sprite.Sprite):
     self.col = col
 
     self.solid = True 
-    self.can_break = False
     
     super(Block, self).__init__()
     
@@ -30,6 +29,10 @@ class Block(pygame.sprite.Sprite):
   def shift(self):
     self.rect = self.rect.move(-1 * SHIFT_SZ, 0)
   
+  # Do nothing
+  def break_block(self):
+    return
+  
   # Increase speed
   @staticmethod
   def increase_shift():
@@ -48,7 +51,6 @@ class Air(Block):
     self.col = col
 
     self.solid = False 
-    self.can_break = False
   
   # Override Block methods
   # Decrease col
@@ -64,11 +66,17 @@ class WallBlock(Block):
   def __init__(self, row, col, image_path=Tile.WALL):
     super().__init__(row, col, image_path)
     self.solid = True
-    self.can_break = True
   
   # Breaks block
   def break_block(self):
+    if not self.solid:
+      return
     self.solid = False 
+
+    # Set block to broken block - need a different sprite
+    self.image = LOAD.load_image(Tile.HARD)
+    self.image = pygame.transform.scale(self.image, (BLOCK_SZ, BLOCK_SZ))
+
   
   # Check for collision
   def collide(self):
@@ -81,7 +89,6 @@ class WallBlock(Block):
 class HardBlock(Block):
   def __init__(self, row, col, image_path=Tile.HARD):
     super().__init__(row, col, image_path)
-    self.can_break = False
     self.solid = True
   
   def collide(self):

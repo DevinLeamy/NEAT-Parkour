@@ -83,10 +83,15 @@ class ParkourKing(pygame.sprite.Sprite):
     self.updates_per_frame = self.slides[self.animation_id][1]
   
   # Attack
-  def attack(self):
+  def attack(self, game_map):
     if not (self.animating == Move.RUN):
       return
-    
+
+    game_map[int(self.head_row)][self.LEFT_BUFFER + 3].break_block()
+    game_map[int(self.head_row + 1)][self.LEFT_BUFFER + 3].break_block()
+    game_map[int(self.head_row)][self.LEFT_BUFFER + 4].break_block()
+    game_map[int(self.head_row + 1)][self.LEFT_BUFFER + 4].break_block()
+
     # Begins attacking
     self.animating = Move.ATK
     self.current_frame = 0.0
@@ -196,7 +201,7 @@ class ParkourKing(pygame.sprite.Sprite):
       self.run()
 
   # Move
-  def move(self, move=Move.RUN):
+  def move(self, move=Move.RUN, game_map=False):
     # Make move
     if (move == Move.RUN):
       pass
@@ -205,7 +210,8 @@ class ParkourKing(pygame.sprite.Sprite):
     elif (move == Move.SLD):
       self.slide()
     elif (move == Move.ATK):
-      self.attack()
+      assert not type(game_map) == bool
+      self.attack(game_map)
     else:
       raise ValueError("Specified move is undefined")
   

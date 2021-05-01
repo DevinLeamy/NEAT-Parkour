@@ -96,7 +96,7 @@ while running:
       elif event.key == pygame.K_s:
         game.PK.move(Move.SLD)
       elif event.key == pygame.K_SPACE:
-        game.PK.move(Move.ATK)
+        game.PK.move(Move.ATK, game.game_map.grid)
 
   # Displaying
   SCN.blit(LOAD.load_image("TileSet2/Background/Background.png"), (0, 0))
