@@ -1,7 +1,7 @@
 from config import *
 import pygame
 import random
-from enums import Move, Level
+from enums import Move, Level, State
 
 # Player 
 class ParkourKing(pygame.sprite.Sprite):
@@ -232,15 +232,14 @@ class ParkourKing(pygame.sprite.Sprite):
 
   # Check for obstacle collisions
   def colliding(self, grid):
-    return False
     row = int(self.head_row)
     if self.animating == Move.SLD:
       # Two wide
-      if grid[row][self.LEFT_BUFFER].solid or grid[row][self.LEFT_BUFFER + 1].solid:
+      if grid[row][self.LEFT_BUFFER + 1].solid or grid[row][self.LEFT_BUFFER + 2].solid:
         return True
     else:
       # One wide
-      if grid[row][self.LEFT_BUFFER].solid or grid[row + 1][self.LEFT_BUFFER].solid:
+      if grid[row][self.LEFT_BUFFER + 1].solid or grid[row + 1][self.LEFT_BUFFER + 1].solid:
         return True 
     return False
       
@@ -250,10 +249,10 @@ class ParkourKing(pygame.sprite.Sprite):
     if (not self.on_ground(grid)) and (not self.animating == Move.JMP):
       self.fall()
     if self.colliding(grid):
-      # Terminate the game / Return a score? 
-      pass
+      return State.OVER
 
     # Images
     self.set_image()
     self.update_current_frame()
+    return State.RUNNING
 

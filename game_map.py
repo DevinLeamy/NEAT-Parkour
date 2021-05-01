@@ -26,7 +26,7 @@ class Map:
     self.grid = [[Air(i, j) for j in range(self.cols)] for i in range(self.rows)]
 
     # Add obstacle blocks
-    for i in range(self.cols):
+    for i in range(10, self.cols):
       if not i % 5 == 0:
         continue
       ob = random.choice(OBSTACLES)

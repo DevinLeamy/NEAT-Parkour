@@ -26,3 +26,7 @@ class Ob():
   THARD = 1
   BHARD = 2
 
+class State():
+  RUNNING = -1
+  OVER = -2 
+

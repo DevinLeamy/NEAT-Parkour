@@ -10,7 +10,7 @@ pygame.display.init()
 # Constants
 SCN = pygame.display.set_mode((W, H))
 
-from enums import Color, Move, Ob
+from enums import Color, Move, Ob, State
 # from game import Game
 # Pygame init
 pygame.display.flip()
@@ -59,7 +59,7 @@ class Game:
   # Updates all game sprites
   def update(self):
     # Update player and map
-    self.PK.update(self.game_map.grid)
+    state = self.PK.update(self.game_map.grid)
     self.game_map.update()
 
     self.updates_and_display_score()
@@ -70,6 +70,10 @@ class Game:
       self.game_map.ask_increase = True
 
     self.draw()
+
+    if state == State.OVER:
+      return self.score
+    return State.RUNNING
 
   # Draw game state
   def draw(self):
@@ -83,6 +87,7 @@ class Game:
 
 # Initialize game
 game = Game()
+score = State.RUNNING
 
 CLK = pygame.time.Clock()
 # Game loop
@@ -100,10 +105,13 @@ while running:
 
   # Displaying
   SCN.blit(LOAD.load_image("TileSet2/Background/Background.png"), (0, 0))
-  game.update()
+  score = game.update() 
+  if not score == State.RUNNING: 
+    break
   pygame.display.update()
   
   # Set speed
   CLK.tick(DELAY)
   # pygame.time.delay(DELAY)
+print("You achieved a score of: %d" % (score))
 pygame.display.quit()
