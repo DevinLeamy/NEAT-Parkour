@@ -12,4 +12,3 @@
 - Improve speed
 - Increase speed over time
 - Add score
-- Seperate classes into seperate files
