@@ -10,9 +10,6 @@ pygame.display.init()
 # Constants
 SCN = pygame.display.set_mode((W, H))
 
-from image_loader import ImageLoader
-LOAD = ImageLoader()
-
 from enums import Color, Move, Ob
 # from game import Game
 # Pygame init

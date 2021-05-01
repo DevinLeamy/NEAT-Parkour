@@ -49,19 +49,17 @@ class Map:
       for j in range(len(self.grid[i])):
         self.grid[i][j].shift()
 
-    # This is currently O(N^2) - Can be refactored 
     if self.total_shift == BLOCK_SZ:
       # Reset total shift
       self.total_shift = 0
-      # Reset block shifts and remove left-most row
-      for i in range(self.rows):
-        # Col of first element should be 0
-        self.grid[i].pop(0)
       for i in range(self.rows):
         for j in range(len(self.grid[0])):
           self.grid[i][j].decrease_col()  
 
     if self.current_buffer == 0:
+      # Might break something - be weary
+      for i in range(self.rows):
+        self.grid[i] = self.grid[i][5:]
       self.generate_buffer()
 
   # Returns block sprites
