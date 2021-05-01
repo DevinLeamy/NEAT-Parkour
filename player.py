@@ -13,11 +13,11 @@ class ParkourKing(pygame.sprite.Sprite):
     self.head_row = Level.GRND - 2 # Two blocks above ground level
         
     # Id: (frame-count, updates-per-frame)
-    self.attacks = {1: (5, 4), 2: (6, 4), 3: (6, 4)}
-    self.jumps = {1: (4, 2)}    
-    self.falls = {1: (4, 2)}
-    self.runs = {1: (6, 4)}
-    self.slides = {1: (6, 4)}
+    self.attacks = {1: [5, 4], 2: [6, 4], 3: [6, 4]}
+    self.jumps = {1: [4, 2]}    
+    self.falls = {1: [4, 2]}
+    self.runs = {1: [6, 4]}
+    self.slides = {1: [6, 4]}
     
     # Generate image path
     self.get_attack_frame = lambda id, frame: "Adventurer/Sprites/adventurer-attack%d-0%d.png" % (id, frame)
@@ -118,6 +118,11 @@ class ParkourKing(pygame.sprite.Sprite):
       return self.get_slide_frame(self.animation_id, int(self.current_frame))
     else:
       raise ValueError("Not animating a valid move")
+  
+  # Increase speed 
+  def increase_speed(self):
+    for key in self.runs.keys():
+      self.runs[key][1] = max(2, self.runs[key][1] - 1)
   
   # Scale image
   def scale_image(self):

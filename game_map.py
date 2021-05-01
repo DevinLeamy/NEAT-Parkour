@@ -1,4 +1,4 @@
-from blocks import Block, HardBlock, WallBlock, Air
+from blocks import Block, HardBlock, WallBlock, Air, SHIFT_SZ
 import random
 from enums import Level, Tile, Ob
 from config import *
@@ -16,6 +16,9 @@ class Map:
     self.rows = BLOCKS
     self.grid = []
     self.initialize_map()
+
+    # Increase at next chance
+    self.ask_increase = False 
 
   # Create initial map config - Requires refactor
   def initialize_map(self):
@@ -45,13 +48,14 @@ class Map:
  
   # Update blocks
   def update(self):
-    self.current_buffer -= Block.SHIFT_SZ
-    self.total_shift += Block.SHIFT_SZ
+    # SHIFT_SZ might have changed
+    from blocks import SHIFT_SZ
+    self.current_buffer -= SHIFT_SZ
+    self.total_shift += SHIFT_SZ
     for i in range(self.rows):
       for j in range(len(self.grid[i])):
         self.grid[i][j].shift()
 
-    # This is currently O(N^2) - Can be refactored 
     if self.total_shift == BLOCK_SZ:
       # Reset total shift
       self.total_shift = 0
@@ -64,7 +68,14 @@ class Map:
           self.grid[i][j].decrease_col()  
 
     if self.current_buffer == 0:
+      if self.ask_increase:
+        self.ask_increase = False
+        self.increase_speed()
       self.generate_buffer()
+
+  # Increase speed
+  def increase_speed(self):
+    Block.increase_shift()
 
   # Returns block sprites
   def get_sprites(self):

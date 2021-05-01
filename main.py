@@ -64,6 +64,11 @@ class Game:
 
     self.updates_and_display_score()
 
+    # Increase speed
+    if self.updates % 750 == 0:
+      self.PK.increase_speed()
+      self.game_map.ask_increase = True
+
     self.draw()
 
   # Draw game state

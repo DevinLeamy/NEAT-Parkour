@@ -2,9 +2,9 @@ from enums import Tile
 from config import *
 import pygame
 
+SHIFT_SZ = 5
 # Block
 class Block(pygame.sprite.Sprite):
-  SHIFT_SZ = 5
   def __init__(self, row, col, image_path=Tile.GRASS):
     self.row = row 
     self.col = col
@@ -28,7 +28,18 @@ class Block(pygame.sprite.Sprite):
 
   # Shift block left 
   def shift(self):
-    self.rect = self.rect.move(-1 * self.SHIFT_SZ, 0)
+    self.rect = self.rect.move(-1 * SHIFT_SZ, 0)
+  
+  # Increase speed
+  @staticmethod
+  def increase_shift():
+    global SHIFT_SZ
+    SHIFT_SZ = min(15, SHIFT_SZ + 1)
+
+    # SHIFT_SZ must be a divisor of BLOCK_SZ
+    while BLOCK_SZ % SHIFT_SZ != 0:
+      SHIFT_SZ += 1
+    assert BLOCK_SZ % SHIFT_SZ == 0
 
 # Air block
 class Air(Block):
