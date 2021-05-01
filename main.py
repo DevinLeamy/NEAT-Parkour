@@ -34,12 +34,35 @@ class Game:
 
     # Create map and add block sprites
     self.game_map = Map()
+
+    # Score
+    self.updates = 0
+    self.score = 0
+    self.get_score = lambda updates:updates // 10 
+
+    # Score display
+    self.get_score_string = lambda score: "Score: %d" % (score)
+    self.score_font = pygame.font.SysFont("couriernewttf", 25)
+
+  # Update score
+  def updates_and_display_score(self):
+    # Update
+    self.updates += 1
+    self.score = self.get_score(self.updates)
+
+    # Display
+    score_display = self.score_font.render(self.get_score_string(self.score), True, Color.BLACK)
+    score_rect = score_display.get_rect()
+    score_rect.topleft = (0, 0)
+    SCN.blit(score_display, score_rect)
   
   # Updates all game sprites
   def update(self):
     # Update player and map
     self.PK.update(self.game_map.grid)
     self.game_map.update()
+
+    self.updates_and_display_score()
 
     self.draw()
 
