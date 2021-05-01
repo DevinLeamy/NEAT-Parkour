@@ -100,7 +100,7 @@ class Map:
         continue
       elif i == Level.GRND - 2:
         # Make the number of obstacles a choice?
-        pos = random.choice(range(2, self.BUFFER))
+        pos = random.choice(range(3, self.BUFFER))
         ob = random.choice(OBSTACLES) 
         
         # Add row buffers
