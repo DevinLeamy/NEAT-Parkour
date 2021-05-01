@@ -104,7 +104,7 @@ while running:
         game.PK.move(Move.ATK, game.game_map.grid)
 
   # Displaying
-  SCN.blit(LOAD.load_image("TileSet2/Background/Background.png"), (0, 0))
+  SCN.blit(LOAD.load_image("Tiles/Background.png"), (0, 0))
   score = game.update() 
   if not score == State.RUNNING: 
     break
