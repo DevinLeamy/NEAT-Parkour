@@ -31,7 +31,7 @@ class Block(pygame.sprite.Sprite):
   
   # Do nothing
   def break_block(self):
-    return
+    return 
   
   # Increase speed
   @staticmethod
@@ -70,11 +70,11 @@ class WallBlock(Block):
   # Breaks block
   def break_block(self):
     if not self.solid:
-      return
+      return self
     self.solid = False 
 
     # Set block to broken block - need a different sprite
-    self.image = LOAD.load_image(Tile.HARD)
+    self.image = LOAD.load_image(Tile.AIR, False)
     self.image = pygame.transform.scale(self.image, (BLOCK_SZ, BLOCK_SZ))
 
   

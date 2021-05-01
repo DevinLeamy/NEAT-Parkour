@@ -1,4 +1,5 @@
 import pygame
+from enums import Tile
 
 # Image loader
 class ImageLoader():
@@ -8,7 +9,7 @@ class ImageLoader():
   # Get loaded image
   def load_image(self, path, convert=True):
     if not path in self.images:
-      if convert:      
+      if convert:
         self.images[path] = pygame.image.load(path).convert()
       else:
         self.images[path] = pygame.image.load(path)

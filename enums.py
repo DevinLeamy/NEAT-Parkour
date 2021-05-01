@@ -15,10 +15,11 @@ class Color():
   GREY = (230, 230, 230)
 
 class Tile():
-  GRASS = "TileSet2/Tiles/GrassMid.png"
-  DIRT = "TileSet2/Tiles/Dirt.png"
-  WALL = "TileSet/Objects/Crate.png"
-  HARD = "TileSet/Tiles/stone.png"
+  GRASS = "Tiles/GrassMid.png"
+  DIRT = "Tiles/Dirt.png"
+  WALL = "Tiles/Crate.png"
+  HARD = "Tiles/Stone.png"
+  AIR = "Tiles/Air.png"
 
 class Ob():
   WALL = 0
