@@ -7,19 +7,17 @@ from enums import Move, Level
 class ParkourKing(pygame.sprite.Sprite):
   def __init__(self):
     super(ParkourKing, self).__init__()
-    self.updates_per_frame = 5.0 # Num of update before frame change
-    self.frame_increment = 1 / self.updates_per_frame 
 
     # Position
     self.LEFT_BUFFER = 3
     self.head_row = Level.GRND - 2 # Two blocks above ground level
         
-    # Id and frame count
-    self.attacks = {1: 5, 2: 6, 3: 6}
-    self.jumps = {1: 4}    
-    self.falls = {1: 4}
-    self.runs = {1: 6}
-    self.slides = {1: 6}
+    # Id: (frame-count, updates-per-frame)
+    self.attacks = {1: (5, 4.0), 2: (6, 4.0), 3: (6, 4.0)}
+    self.jumps = {1: (4, 4.0)}    
+    self.falls = {1: (4, 4.0)}
+    self.runs = {1: (6, 4.0)}
+    self.slides = {1: (6, 4.0)}
     
     # Generate image path
     self.get_attack_frame = lambda id, frame: "Adventurer/Sprites/adventurer-attack%d-0%d.png" % (id, frame)
@@ -41,8 +39,9 @@ class ParkourKing(pygame.sprite.Sprite):
     
     # Current animation frame
     self.animation_id = random.choice(list(self.runs.keys()))
+    self.get_frame_increment = lambda updates_per_frame : 1 / self.updates_per_frame
     self.current_frame = 0.0
-    
+    self.updates_per_frame = self.runs[self.animation_id][1]
 
   # Jumps
   def jump(self):
@@ -54,6 +53,7 @@ class ParkourKing(pygame.sprite.Sprite):
     self.animating = Move.JMP
     self.current_frame = 0.0
     self.animation_id = random.choice(list(self.jumps.keys()))
+    self.updates_per_frame = self.jumps[self.animation_id][1]
 
   # Fall
   def fall(self):
@@ -68,6 +68,7 @@ class ParkourKing(pygame.sprite.Sprite):
     self.animating = Move.FALL
     self.current_frame = 0.0
     self.animation_id = random.choice(list(self.falls.keys()))
+    self.updates_per_frame = self.falls[self.animation_id][1]
 
   # Slide
   def slide(self):
@@ -79,25 +80,8 @@ class ParkourKing(pygame.sprite.Sprite):
     self.animating = Move.SLD
     self.current_frame = 0.0
     self.animation_id = random.choice(list(self.slides.keys()))
-
-  # Shift player up an down
-  def shift(self):
-    if not self.animating == Move.JMP and not self.animating == Move.FALL:
-      return
-    
-    total_updates = self.updates_per_frame * self.jumps[self.animation_id]
-    dist_shift = BLOCK_SZ / float(total_updates)
-    row_shift = 1 / float(total_updates)
-    
-    if self.animating == Move.JMP:
-      # Shift upwards
-      self.rect = self.rect.move(0, -1 * dist_shift)
-      self.head_row += -1 * row_shift
-    else:
-      # Shift downwards
-      self.rect = self.rect.move(0, dist_shift)
-      self.head_row += row_shift
-    
+    self.updates_per_frame = self.slides[self.animation_id][1]
+  
   # Attack
   def attack(self):
     if not (self.animating == Move.RUN):
@@ -107,6 +91,7 @@ class ParkourKing(pygame.sprite.Sprite):
     self.animating = Move.ATK
     self.current_frame = 0.0
     self.animation_id = random.choice(list(self.attacks.keys()))
+    self.updates_per_frame = self.attacks[self.animation_id][1]
   
   # Run
   def run(self):
@@ -117,6 +102,7 @@ class ParkourKing(pygame.sprite.Sprite):
     self.animating = Move.RUN
     self.current_frame = 0.0
     self.animation_id = random.choice(list(self.runs.keys()))
+    self.updates_per_frame = self.runs[self.animation_id][1]
     
   # Get image
   def get_image_path(self):
@@ -145,23 +131,48 @@ class ParkourKing(pygame.sprite.Sprite):
     path = self.get_image_path()
     self.image = LOAD.load_image(path, False)
     self.scale_image()
+
+  # Shift player up an down
+  def shift(self):
+    if not self.animating == Move.JMP and not self.animating == Move.FALL:
+      return
+      
+    # Determine total updates
+    total_updates = self.updates_per_frame 
+    if self.animating == Move.JMP:
+      total_updates *= self.jumps[self.animation_id][0]
+    elif self.animating == Move.FALL:
+      total_updates *= self.falls[self.animation_id][0]
+
+    dist_shift = BLOCK_SZ / float(total_updates)
+    row_shift = 1 / float(total_updates)
+    
+    if self.animating == Move.JMP:
+      # Shift upwards
+      self.rect = self.rect.move(0, -1 * dist_shift)
+      self.head_row += -1 * row_shift
+    else:
+      # Shift downwards
+      self.rect = self.rect.move(0, dist_shift)
+      self.head_row += row_shift
     
   # Update current frame 
   def update_current_frame(self):
-    self.current_frame += self.frame_increment
+    frame_increment = self.get_frame_increment(self.updates_per_frame)
+    self.current_frame += frame_increment
     
     if (self.animating == Move.RUN):
-      self.current_frame %= self.runs[self.animation_id]
+      self.current_frame %= self.runs[self.animation_id][0]
     elif (self.animating == Move.JMP):
-      self.current_frame %= self.jumps[self.animation_id]
+      self.current_frame %= self.jumps[self.animation_id][0]
       self.shift()
     elif (self.animating == Move.FALL):
-      self.current_frame %= self.falls[self.animation_id]
+      self.current_frame %= self.falls[self.animation_id][0]
       self.shift()
     elif (self.animating == Move.SLD):
-      self.current_frame %= self.slides[self.animation_id]
+      self.current_frame %= self.slides[self.animation_id][0]
     elif (self.animating == Move.ATK):
-      self.current_frame %= self.attacks[self.animation_id]
+      self.current_frame %= self.attacks[self.animation_id][0]
     else:
       raise ValueError("Not animating a valid move")
     
