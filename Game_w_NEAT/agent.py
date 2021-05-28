@@ -2,11 +2,12 @@ from config import *
 import pygame
 import random
 from enums import Move, Level, State
+from agent_input import Input 
 
 # Player 
-class ParkourKing(pygame.sprite.Sprite):
+class Agent(pygame.sprite.Sprite):
   def __init__(self):
-    super(ParkourKing, self).__init__()
+    super(Agent, self).__init__()
 
     # Position
     self.LEFT_BUFFER = 3
@@ -245,6 +246,9 @@ class ParkourKing(pygame.sprite.Sprite):
       
   # Update player state
   def update(self, grid):
+    # Retrieve input data
+    input_data = self.measure(grid)
+
     # Check for collisions
     if (not self.on_ground(grid)) and (not self.animating == Move.JMP):
       self.fall()
@@ -255,4 +259,26 @@ class ParkourKing(pygame.sprite.Sprite):
     self.set_image()
     self.update_current_frame()
     return State.RUNNING
-
+  
+  # Calculate inputs to Agent
+  def measure(self, grid):
+    """
+    What are the inputs to the agent?
+    - Head height [0, 1, 2]
+    - Sliding [0, 1]
+    - Type of next block @ groud-height + 3
+    - Type of next block @ groud-height + 2 
+    - Type of next block @ groud-height + 1
+    """
+    return Input(
+      # Substration to make value smaller
+      height=abs(self.head_row - Level.GRND),
+      # Might be able to use the raw assignment
+      sliding=1 if self.animating == Move.RUN else 0,
+      # Block type of upcoming blocks
+      type1=grid[Level.GRND - 1][self.LEFT_BUFFER + 2].get_block_type(),
+      type2=grid[Level.GRND - 2][self.LEFT_BUFFER + 2].get_block_type(),
+      type3=grid[Level.GRND - 3][self.LEFT_BUFFER + 2].get_block_type(),
+      # Next block col
+      dist=grid[Level.GRND - 1][self.LEFT_BUFFER + 2].get_block_start()
+    )

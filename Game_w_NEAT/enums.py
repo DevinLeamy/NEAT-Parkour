@@ -21,6 +21,12 @@ class Tile():
   HARD = "Tiles/Stone.png"
   AIR = "Tiles/Air.png"
 
+  GRASS_ID = 0
+  DIRT_ID = 1
+  WALL_ID = 2
+  HARD_ID = 3
+  AIR_ID = 4
+
 class Ob():
   WALL = 0
   THARD = 1
@@ -29,4 +35,3 @@ class Ob():
 class State():
   RUNNING = -1
   OVER = -2 
-

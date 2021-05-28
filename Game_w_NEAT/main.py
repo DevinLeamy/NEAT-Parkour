@@ -9,6 +9,10 @@ pygame.display.init()
 
 # Constants
 SCN = pygame.display.set_mode((W, H))
+# BATCH = 20
+# EPOCH = 100
+BATCH = 1
+EPOCH = 1
 
 from enums import Color, Move, Ob, State
 # from game import Game
@@ -18,7 +22,7 @@ pygame.display.set_caption("Teaching Parkour... The Darwin Way")
 
 running = True
 
-from player import ParkourKing
+from agent import Agent 
 from game_map import Map
 
 
@@ -29,7 +33,7 @@ class Game:
     self.sprites = pygame.sprite.Group()
 
     # Add player sprite
-    self.PK = ParkourKing()
+    self.PK = Agent()
     self.sprites.add(self.PK)
 
     # Create map and add block sprites
@@ -85,33 +89,37 @@ class Game:
     # Draw sprites to screen
     self.sprites.draw(SCN)
 
-# Initialize game
-game = Game()
-score = State.RUNNING
-
 CLK = pygame.time.Clock()
-# Game loop
-while running:
-  for event in pygame.event.get():
-    if event.type == pygame.QUIT:
-      running = False
-    elif event.type == pygame.KEYDOWN:
-      if event.key == pygame.K_w:
-        game.PK.move(Move.JMP)
-      elif event.key == pygame.K_s:
-        game.PK.move(Move.SLD)
-      elif event.key == pygame.K_SPACE:
-        game.PK.move(Move.ATK, game.game_map.grid)
 
-  # Displaying
-  SCN.blit(LOAD.load_image("Tiles/Background.png"), (0, 0))
-  score = game.update() 
-  if not score == State.RUNNING: 
-    break
-  pygame.display.update()
-  
-  # Set speed
-  CLK.tick(DELAY)
-  # pygame.time.delay(DELAY)
-print("You achieved a score of: %d" % (score))
-pygame.display.quit()
+# Game loop
+for batch in range(BATCH):
+  for epoch in range(EPOCH):
+    # Initialize game
+    game = Game()
+    state = State.RUNNING 
+
+    agent_score = 0
+    while True:
+      for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+          running = False
+        elif event.type == pygame.KEYDOWN:
+          if event.key == pygame.K_w:
+            game.PK.move(Move.JMP)
+          elif event.key == pygame.K_s:
+            game.PK.move(Move.SLD)
+          elif event.key == pygame.K_SPACE:
+            game.PK.move(Move.ATK, game.game_map.grid)
+
+      # Displaying
+      SCN.blit(LOAD.load_image("Tiles/Background.png"), (0, 0))
+      state = game.update() 
+      if not state == State.RUNNING: 
+        agent_score = state
+        print("You achieved a score of: %d" % (agent_score))
+        break
+      pygame.display.update()
+    
+      # Set speed
+      CLK.tick(DELAY)
+# pygame.display.quit()
