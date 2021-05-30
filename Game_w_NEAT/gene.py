@@ -11,3 +11,4 @@ class Gene():
     self.inv = inv
     self.active = active
     self.weight = weight
+  
