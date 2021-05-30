@@ -9,8 +9,12 @@ class NEAT():
   c1, c2, c3: From coefficents of compability function
   c_thresh: Compatibility threshold 
   species: List of all agents, seperated by species 
+  initial_pop: In initial number of agents
   '''
-  def __init__(self, c1=1, c2=1, c3=1, c_threshold=10):
+  # Increase intial_pop to 1000 if it's not successful
+  # Increase c3 to 3.0 to allow for finer distinctions between species base on weight differences
+  # If c3 is increased, increase c_threshold to 4.0
+  def __init__(self, c1=1.0, c2=1.0, c3=0.4, c_threshold=3.0, initial_pop=150): 
     self.c1 = c1
     self.c2 = c2
     self.c3 = c3
@@ -78,7 +82,7 @@ class NEAT():
     new_species = [[] for i in range(len(self.species))]
     for agent in offsping:
       found_match = False
-      for idx, rep in species_reps:
+      for idx, rep in enumerate(species_reps):
         if self.compable(agent, rep):
           found_match = True
           new_species[idx].append(agent)
