@@ -1,17 +1,21 @@
 from genome import Genome
 from agent import Agent
 from gene import Gene
+import random
 
 # Responsible for training all the agents
 class NEAT():
   '''
-  agents: All the candidates 
+  c1, c2, c3: From coefficents of compability function
+  c_thresh: Compatibility threshold 
+  species: List of all agents, seperated by species 
   '''
-  def __init__(self, c1=1, c2=1, c3=1):
+  def __init__(self, c1=1, c2=1, c3=1, c_threshold=10):
     self.c1 = c1
     self.c2 = c2
     self.c3 = c3
-
+    self.c_threshold = c_threshold
+    self.species = []
 
   # Measures compatibility of different genomes
   def compatibility(self, parent1: Agent, parent2: Agent):
@@ -62,9 +66,25 @@ class NEAT():
     # Compatibilty
     comp = (self.c1 * E) / N + (self.c2 * D) / N + (self.c3 * W)
     return comp 
-    
-  # Determine if a pair of genes are matching
-  def match(self, gene1: Gene, gene2: Gene):
-    # Check for matching innovation numbers
-    return gene1.inv == gene2.inv
-    
+  
+  # Determine if two agents are compatible - i.e. of the same species
+  def compable(self, agent1: Agent, agent2: Agent):
+    return self.compatibility(agent1, agent2) <= self.c_threshold
+  
+  # Update species
+  def update_species(self, offspring):
+    # Species representative agents 
+    species_reps = [random.choice(species) for species in self.species]
+    new_species = [[] for i in range(len(self.species))]
+    for agent in offsping:
+      found_match = False
+      for idx, rep in species_reps:
+        if self.compable(agent, rep):
+          found_match = True
+          new_species[idx].append(agent)
+      if not found_match:
+        # Create new species and set representative
+        species_reps.append(agent)
+        new_species.append([agent])
+
+      

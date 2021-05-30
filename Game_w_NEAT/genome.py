@@ -18,14 +18,14 @@ class Genome():
   # Determine if given gene has a matching gene 
   def has_matching(self, gene: Gene):
     for self_gene in self.genes:
-      if gene.inv == self_gene.inv:
+      if gene.match(self_gene):
         return True
     return False
   
   # Find matching gene of given gene, if it exists
   def get_matching(self, gene: Gene):
     for self_gene in self.genes:
-      if gene.inv == self_gene.inv:
+      if gene.match(self_gene):
         return self_gene
     # Matching gene does not exist
     return None

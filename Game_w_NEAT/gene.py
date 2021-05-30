@@ -12,3 +12,7 @@ class Gene():
     self.active = active
     self.weight = weight
   
+  # Determine if a given gene is a matching gene
+  def match(self, gene: Gene):
+    return gene.inv == self.inv
+  
