@@ -22,7 +22,7 @@ pygame.display.set_caption("Teaching Parkour... The Darwin Way")
 
 running = True
 
-from agent import Agent 
+from player import Player 
 from game_map import Map
 
 
@@ -33,7 +33,7 @@ class Game:
     self.sprites = pygame.sprite.Group()
 
     # Add player sprite
-    self.PK = Agent()
+    self.PK = Player()
     self.sprites.add(self.PK)
 
     # Create map and add block sprites
