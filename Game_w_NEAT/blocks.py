@@ -1,6 +1,7 @@
 from enums import Tile
 from config import *
 import pygame
+from pygame import Rect
 
 SHIFT_SZ = 5
 # Block
@@ -43,23 +44,38 @@ class Block(pygame.sprite.Sprite):
     while BLOCK_SZ % SHIFT_SZ != 0:
       SHIFT_SZ += 1
     assert BLOCK_SZ % SHIFT_SZ == 0
+  
+  # Returns block type Id 
+  def get_block_type(self):
+    if isinstance(self, HardBlock):
+      return Tile.HARD_ID
+    elif isinstance(self, WallBlock):
+      return Tile.WALL_ID
+    else:
+      return Tile.AIR_ID
+  
+  # Get location of left side of block
+  def get_block_start(self):
+    return self.rect.left
 
 # Air block
 class Air(Block):
   def __init__(self, row, col):
     self.row = row
     self.col = col
-
     self.solid = False 
-  
-  # Override Block methods
-  # Decrease col
+
+  # Block Override: Decrease col
   def decrease_col(self):
     self.col -= 1 
 
-  # Do nothing 
+  # Block Override: Do nothing 
   def shift(self):
-    return 
+    return
+  
+  # Block Override: Does not have left
+  def get_block_start(self):
+    return 0
 
 # Wall block
 class WallBlock(Block):
