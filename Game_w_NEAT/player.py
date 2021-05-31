@@ -262,14 +262,6 @@ class Player(pygame.sprite.Sprite):
   
   # Calculate inputs to Agent
   def measure(self, grid):
-    """
-    What are the inputs to the agent?
-    - Head height [0, 1, 2]
-    - Sliding [0, 1]
-    - Type of next block @ groud-height + 3
-    - Type of next block @ groud-height + 2 
-    - Type of next block @ groud-height + 1
-    """
     return Input(
       # Substration to make value smaller
       height=abs(self.head_row - Level.GRND),

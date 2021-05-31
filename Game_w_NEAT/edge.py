@@ -34,11 +34,12 @@ class Edge():
       # Uniformly perturbed (slight change) - 90% chance
       mutate_power = 2
       self.weight = self.clamp(random.gauss(0.0, 2))
-    
+  
+  ## Helper functions 
+
   # Squeeze input between a range
   def clamp(self, x):
     return min(max(-1, x), 1)
-
 
   # Disable edge
   def disable(self):
