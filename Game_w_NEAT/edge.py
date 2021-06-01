@@ -8,6 +8,8 @@ TODO: Make the weight bounds (-1, 1) and mutation power (2) configurable
 
 # Connection gene between two nodes
 class Edge():
+  # Global innovation number
+  global_inv = 0
   '''
   in_node: Input node
   out_node: Output node
@@ -15,12 +17,14 @@ class Edge():
   weight: Weight of the edge
   inv: Innovation number of the edge
   '''
-  def __init__(self, in_node, out_node, active, weight, inv):
+  def __init__(self, in_node, out_node, active, weight):
     self.in_node = in_node
     self.out_node = out_node
     self.active = active
     self.weight = weight
-    self.inv = inv
+    self.inv = self.global_inv 
+    # Increase increment
+    self.global_inv += 1
   
   # Mutate weight 
   def mutate(self):
@@ -34,11 +38,10 @@ class Edge():
       # Uniformly perturbed (slight change) - 90% chance
       mutate_power = 2
       self.weight = self.clamp(random.gauss(0.0, 2))
-    
+  
   # Squeeze input between a range
   def clamp(self, x):
     return min(max(-1, x), 1)
-
 
   # Disable edge
   def disable(self):
@@ -47,3 +50,23 @@ class Edge():
   # Enable edge
   def enable(self):
     self.active = True
+
+  # Determine if edge matched self
+  def edge_matches(self, new_edge_in_node, new_edge_out_node):
+    # Input nodes must match
+    if new_edge_in_node._id != self.in_node._id:
+      return False
+    # Output nodes must match
+    if new_edge_out_node._id != self.out_node._id:
+      return False
+    return True
+  
+  # Determine if edge represents the same gene as self
+  def gene_matches(self, edge):
+    # Compare innovation numbers
+    return edge.inv == self.inv
+  
+  # Calculate weight distance between edges
+  @staticmethod
+  def weight_distance(edge_1, edge_2):
+    return abs(edge_1.weight - edge_2.weight)

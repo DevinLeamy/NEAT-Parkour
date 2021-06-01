@@ -7,15 +7,11 @@ class Agent():
   # player: Agents player, plays the game
   # genome: Agents player controller
   # fitness: Agents fitness
-  # in_nodes: Number of input nodes
-  # out_nodes: Number of output nodes
   # '''
-  def __init__(self, genes=None, in_nodes=6, out_nodes=4):
+  def __init__(self, genes=None):
     self.fitness = -1 
     self.player = Player() 
     self.genome = Genome(genes)
-    self.in_nodes = in_nodes
-    self.out_nodes = out_nodes
   
   # Determine agent fitness
   def fitness(self, recalculate=False):
