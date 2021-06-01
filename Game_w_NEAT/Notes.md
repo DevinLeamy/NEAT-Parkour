@@ -8,3 +8,7 @@
 - species.py (Controller of species)
 - population.py (Controller of all members of the population)
 - main.py (Controller for population training and game logic)
+
+
+## Naming
+- I use the term _edge_ in place of connection _gene_
