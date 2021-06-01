@@ -94,7 +94,7 @@ class Genome():
         E += 1
     
     # Average weight distance
-    W = total_wd / total_mc
+    W = Genome.average_weight_d(genome_1, genome_2)
 
     # Compatibility
     comp = (Genome.c1 * E) / N + (Genome.c2 * D) / N + (Genome.c3 * W)
@@ -118,3 +118,8 @@ class Genome():
         continue
       total_wd += Edge.weight_distance(edge, matching_edge)
       total_mc += 1
+    
+    # Average weight distance 
+    # W=100 in case of divide-by-zero
+    W = total_wd / total_mc if total_mc != 0 else 100
+    return W
