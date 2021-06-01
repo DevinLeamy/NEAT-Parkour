@@ -17,7 +17,7 @@ class Edge():
   weight: Weight of the edge
   inv: Innovation number of the edge
   '''
-  def __init__(self, in_node, out_node, active, weight):
+  def __init__(self, in_node, out_node, active, weight=random.uniform(-1, 1)):
     self.in_node = in_node
     self.out_node = out_node
     self.active = active
