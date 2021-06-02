@@ -16,7 +16,7 @@ class Genome():
   in_nodes: Number of input nodes
   out_nodes: Number of output nodes
   '''
-  def __init__(self, in_nodes=6, out_nodes=6, c1=1.0, c2=1.0, c3=0.4, c_threshold=3.0):
+  def __init__(self, in_nodes=6, out_nodes=6):
     self.in_nodes = in_nodes
     self.out_nodes = out_nodes
 
@@ -76,7 +76,7 @@ class Genome():
 
     max_inv = max([edge.inv for edge in self.edges])
     return max_inv
-
+  
   # Calculate compatibility of two genomes 
   @staticmethod
   def compatibility(genome_1, genome_2):

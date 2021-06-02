@@ -35,8 +35,8 @@ class Node():
 
   # Add edge 
   def add_edge(self, edge):
-    in_node_id = edge.in_node_id
-    out_node_id = edge.out_node_id
+    in_node_id = edge.in_node._id
+    out_node_id = edge.out_node._id
     if self._id == in_node_id:
       # Edge leads out of node
       self.out_bound_edges.append(edge)
