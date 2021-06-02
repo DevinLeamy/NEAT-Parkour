@@ -1,11 +1,9 @@
 # Creates NN from genome and faciliates feedforward 
 class Feedforward():
   '''
-  edges: Edges of the NN
   nodes: Nodes of the NN
   '''
-  def __init__(self, edges, nodes):
-    self.edges = edges
+  def __init__(self, nodes):
     self.nodes = nodes
     self.generate_layers()
 

@@ -8,6 +8,8 @@ from agent_input import Input
 class Player(pygame.sprite.Sprite):
   def __init__(self):
     super(Player, self).__init__()
+    # Status
+    self.alive = True
 
     # Position
     self.LEFT_BUFFER = 3
@@ -47,7 +49,7 @@ class Player(pygame.sprite.Sprite):
   # Jumps
   def jump(self):
     # Player is already in motion
-    if not (self.animating == Move.RUN):
+    if not (self.animating == Move.RUN) and not (self.animating == Move.JMP):
       return
     
     # Begins jumping
@@ -58,8 +60,8 @@ class Player(pygame.sprite.Sprite):
 
   # Fall
   def fall(self):
-    # Already falling 
-    if self.animating == Move.FALL:
+    # Jumping or already falling 
+    if self.animating == Move.FALL or self.animating == Move.JMP:
       return 
     if self.animating == Move.SLD:
       # Return to original height
@@ -73,7 +75,7 @@ class Player(pygame.sprite.Sprite):
 
   # Slide
   def slide(self):
-    if not (self.animating == Move.RUN):
+    if (not self.animating == Move.RUN) or self.animating == Move.SLD:
       return
     
     # Begins sliding
@@ -85,15 +87,16 @@ class Player(pygame.sprite.Sprite):
   
   # Attack
   def attack(self, game_map):
-    if not (self.animating == Move.RUN):
+    if not (self.animating == Move.RUN) and not (self.animating == Move.ATK):
       return
 
+    # Break blocks
     game_map[int(self.head_row)][self.LEFT_BUFFER + 3].break_block()
     game_map[int(self.head_row + 1)][self.LEFT_BUFFER + 3].break_block()
     game_map[int(self.head_row)][self.LEFT_BUFFER + 4].break_block()
     game_map[int(self.head_row + 1)][self.LEFT_BUFFER + 4].break_block()
 
-    # Begins attacking
+    # Starts attacking
     self.animating = Move.ATK
     self.current_frame = 0.0
     self.animation_id = random.choice(list(self.attacks.keys()))
@@ -104,7 +107,7 @@ class Player(pygame.sprite.Sprite):
     if self.animating == Move.RUN:
       return
     
-    # Begins running 
+    # Starts running 
     self.animating = Move.RUN
     self.current_frame = 0.0
     self.animation_id = random.choice(list(self.runs.keys()))
@@ -202,9 +205,12 @@ class Player(pygame.sprite.Sprite):
       self.run()
 
   # Move
-  def move(self, move=Move.RUN, game_map=False):
+  # game_map: Map.grid
+  def move(self, game_map, move=Move.RUN):
     # Make move
-    if (move == Move.RUN):
+    if not self.on_ground(game_map):
+      self.fall()
+    elif (move == Move.RUN):
       pass
     elif (move == Move.JMP):
       self.jump()
@@ -218,7 +224,6 @@ class Player(pygame.sprite.Sprite):
   
   # Check if player on ground
   def on_ground(self, grid):
-    # return True
     row = int(self.head_row)
     if self.animating == Move.SLD:
       # One tall 
@@ -253,12 +258,13 @@ class Player(pygame.sprite.Sprite):
     if (not self.on_ground(grid)) and (not self.animating == Move.JMP):
       self.fall()
     if self.colliding(grid):
-      return State.OVER
+      # Player is dead
+      self.alive = False 
+      return
 
     # Images
     self.set_image()
     self.update_current_frame()
-    return State.RUNNING
   
   # Calculate inputs to Agent
   def measure(self, grid):

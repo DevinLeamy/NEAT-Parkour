@@ -16,23 +16,43 @@ class Genome():
   in_nodes: Number of input nodes
   out_nodes: Number of output nodes
   '''
-  def __init__(self, in_nodes=6, out_nodes=6, c1=1.0, c2=1.0, c3=0.4, c_threshold=3.0):
+  def __init__(self, in_nodes=6, out_nodes=6):
     self.in_nodes = in_nodes
     self.out_nodes = out_nodes
+
+    # Potential problem - if an edge is changes, it must be change in the Genome 
+    # and in all the nodes which it serves to connect. In order words, we need to keep the 
+    # data updated in two places. If python3 operates strictly by reference, then this isn't a problem
     self.nodes = []
     self.edges = []
 
     # Create input nodes
+    in_nodes = []
     for i in range(self.in_nodes):
-      self.nodes.append(Node(Genome.next_id))
+      in_nodes.append(Node(Genome.next_id))
       Genome.next_id += 1
     
     # Create output nodes
+    out_nodes = []
     for i in range(self.out_nodes):
-      self.nodes.append(Node(Genome.next_id))
+      out_nodes.append(Node(Genome.next_id))
       Genome.next_id += 1
     
-    # TODO: Edges also have to be initialized
+    # Initialize edges
+    for in_node in in_nodes:
+      # Create edges between all output nodes
+      for out_node in out_nodes:
+        edge = Edge(in_node, out_node, True) # Note that these are references
+        # Add edge to edges 
+        self.edges.append(edge)
+
+        # Add edge to endpoints (nodes)
+        in_node.add_edge(edge) # The utility of list is shown in feedforward.py
+        out_node.add_edge(edge)
+    
+    # Store input and output nodes
+    self.nodes.extend(in_nodes)
+    self.nodes.extend(out_nodes)
   
   # Determine if genome contains matching gene (edge)
   def has_matching(self, edge):
@@ -56,7 +76,7 @@ class Genome():
 
     max_inv = max([edge.inv for edge in self.edges])
     return max_inv
-
+  
   # Calculate compatibility of two genomes 
   @staticmethod
   def compatibility(genome_1, genome_2):
