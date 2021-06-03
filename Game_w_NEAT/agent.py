@@ -49,5 +49,10 @@ class Agent():
 
     # Update fitness
     self.fitness = score
+  
+  # Deep copy of agent
+  @staticmethod
+  def deep_copy(agent):
+    pass
 
 

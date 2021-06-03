@@ -1,3 +1,5 @@
+import random
+
 # Creates NN from genome and faciliates feedforward 
 class Feedforward():
   '''
@@ -33,6 +35,57 @@ class Feedforward():
         decision = idx
     
     return decision
+
+  # Check if network is full connected
+  def fully_connected(self):
+    for idx, layer in enumerate(self.layers[:-1]): # Excludes output layer
+      # Maximum possible outgoing connections
+      max_connections = len(self.layers[idx]) * len(self.layers[idx + 1]) 
+
+      total_connections = 0
+      for node in layer:
+        total_connections += len(node.out_bound_edges) 
+      
+      assert total_connections <= max_connections
+      if total_connections < max_connections:
+        # Not fully connected 
+        return False
+    # Fully connected 
+    return True
+  
+  # Get random compatible nodes (for forming connections)
+  # Returns: (start_node, end_node)
+  def get_random_compatible_nodes(self):
+    # Collect nodes that can have inbound edges 
+    potential_end = [] # (node, layer)
+    for idx, layer in enumerate(self.layers[1:]): # Input node can't be have inbound edges 
+      previous_layer_sz = len(self.layers[idx - 1])
+      for node in layer:
+        if len(node.in_bound_edges) != previous_layer_sz:
+          # Has space
+          potential_endpoints.append((node, idx))
+
+    # Collect nodes that can have outbound edges 
+    potential_start = [] # (node, layer)
+    for idx, layer in enumerate(self.layers[:-1]): # Output node can't have outbound edges 
+      next_layer_sz = len(self.layers[idx + 1])
+      for node in layer:
+        if len(node.out_bound_edges) != next_layer_sz:
+          # Has space
+          potential_start.append((node, idx))
+    
+    # Shuffle nodes to make selection random
+    random.shuffle(potential_start)
+    random.shuffle(potential_end)
+
+    for start_node, start_layer in potential_start:
+      for end_node, end_layer in potential_end:
+        if start_layer >= end_layer: # Start node must be before end node
+          continue
+        if start_node.leads_to(end_node): # Nodes cannot be connected
+          continue
+        return (start_node, end_node)
+    assert False # A pair should always be found
     
   # Create list of layers of nodes that can be evaluated in parallel
   def generate_layers(self):
@@ -50,6 +103,8 @@ class Feedforward():
       new_layer = []
       for node in layer:
         for edge in node.out_bound_edges:
+          if not edge.active: # Only active edges participate in feedforward 
+            continue
           new_node = edge.out_node
           # Avoid duplicates
           if not new_node in new_layer:

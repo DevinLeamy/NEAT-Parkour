@@ -1,5 +1,6 @@
 from edge import Edge
 from node import Node
+from feedforward import Feedforward
 
 class Genome():
   '''
@@ -77,6 +78,94 @@ class Genome():
     max_inv = max([edge.inv for edge in self.edges])
     return max_inv
   
+  # Add new node
+  def add_node(self):
+    edges = self.all_edges()
+    assert len(edges) != 0
+
+    # Select random edge 
+    edge = random.choice(edges)
+    in_node = edge.in_node
+    out_node = edge.out_node
+    weight = edge.weight
+
+    '''
+    1. Place new node in between edge endpoints
+    2. Disable edge
+    3. Create edges between new node and endpoints
+    3.1 Edge leading into the new node has weight=1.0 
+    3.2 Edge leading out fo the new node have weight=(previous edge's weight) 
+    4. Add new edges to nodes
+    '''
+
+    # Disable existing edge
+    edge.disable() 
+
+    # Create new node
+    new_node = Node(len(self.nodes)) # TODO: Explicit node_id should be removed in place of static Node variable
+
+    # Create new edges - (names are to be read as relative to the new node)
+    in_bound_edge = Edge(in_node, new_node, weight=1)
+    out_bound_edge = Edge(new_node, in_node, weight=weight) 
+
+    # Add edges to nodes
+    in_node.add_edge(in_bound_edge)
+    out_node.add_edge(out_bound_edge)
+    new_node.add(in_bound_edge)
+    new_node.add(out_bound_edge)
+
+  # Get all active edges in genome
+  def all_edges(self):
+    edges = []
+    # Collect all outbound edges of all nodes - this collects all edges
+    for node in self.nodes:
+      for edge in node.out_bound_edges:
+        if not edge.active: # Only active edges are included
+          continue
+        edges.append(edge)
+    return edges
+    
+
+  # Add connection gene (edge) to genome
+  def add_connection(self):
+    # Create NN 
+    feedforward = Feedforward(self.nodes)
+    if feedforward.full_connected():
+      return
+    # Find compatible nodes
+    (start_node, end_node) = feedforward.get_random_compatible_nodes() 
+
+    # Create and add new edge
+    new_edge = Edge(in_node, out_node) 
+    start_node.add_edge(new_edge)
+    end_node.add_edge(new_edge)
+  
+  # TODO: Make probabilities configurable
+  # Mutate genome 
+  def mutate(self):
+    '''
+    - 80% chance weights are mutated 
+    - 5%  chance connection is added
+    - 3%  chance node is added
+    '''
+
+    # Mutate weights 
+    rand = random.uniform(0, 1)
+    if rand < 0.8:
+      edges = self.all_edges()
+      for edge in edges:
+        edge.mutate()
+    
+    # Add connection
+    rand = random.uniform(0, 1)
+    if rand < 0.05:
+      self.add_connection()
+    
+    # Add node
+    rand = random.uniform(0, 1)
+    if rand < 0.03:
+      self.add_node()
+
   # Calculate compatibility of two genomes 
   @staticmethod
   def compatibility(genome_1, genome_2):

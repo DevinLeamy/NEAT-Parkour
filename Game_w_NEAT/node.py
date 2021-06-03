@@ -1,12 +1,12 @@
 # Single node in NN 
 class Node():
   '''
+  _id: Node identifier
   in_val: Input value or sum of input values
   out_val: Output value 
-  _id: Node identifier
   '''
   def __init__(self, _id, in_val=0.0, out_val=0.0):
-    self._id = _id
+    self._id = _id # Id should be set by a static Node.global_id variable
     self.in_val = in_val
     self.out_val = out_val
     # Edges leading into and out of the node
@@ -53,6 +53,16 @@ class Node():
     # No edges lead into input nodes
     if len(self.in_bound_edges) == 0:
       return True
+    return False
+  
+  # Determine if self has edge leading to a given node
+  def leads_to(self, node):
+    node_id = node._id
+    for edge in self.out_bound_edges:
+      if edge.out_node._id == node_id:
+        # self is connected to node by an outbound edge
+        return True
+    # self is not connected to node
     return False
   
   # Determine if node is output node
