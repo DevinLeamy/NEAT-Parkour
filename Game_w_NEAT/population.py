@@ -14,6 +14,10 @@ class Population():
     self.members = []
     for i in range(self.size):
       self.members.append(Agent())
+    
+    # Initialize species
+    self.species = []
+    # TODO: Initialize species
 
     # Player with the highest fitness
     self.best_agent = Agent.deep_copy(self.members[0])
@@ -42,5 +46,12 @@ class Population():
     if (current_gen_best.fitness > self.best_agent.fitness):
       # Replace current best agent 
       self.best_agent = Agent.deep_copy(current_gen_best)
+  
+  # Prune stale species
+  def prune_stale_species(self):
+    for species in self.species:
+      if species.staleness >= 15: # TODO: Make this variable configurable
+        # Remove species
+        self.species.remove(species)
   
 

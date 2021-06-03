@@ -55,6 +55,7 @@ class Edge():
   def enable(self):
     self.active = True
 
+  # TODO: Note were this is used (is it still used?)
   # Determine if edge matched self
   def edge_matches(self, new_edge_in_node, new_edge_out_node):
     # Input nodes must match
@@ -65,6 +66,7 @@ class Edge():
       return False
     return True
   
+  # TODO: Make this static
   # Determine if edge represents the same gene as self
   def gene_matches(self, edge):
     # Compare innovation numbers

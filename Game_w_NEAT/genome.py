@@ -146,7 +146,7 @@ class Genome():
     '''
     - 80% chance weights are mutated 
     - 5%  chance connection is added
-    - 1%  chance node is added
+    - 3%  chance node is added
     '''
 
     # Mutate weights 
@@ -163,7 +163,7 @@ class Genome():
     
     # Add node
     rand = random.uniform(0, 1)
-    if rand < 0.01:
+    if rand < 0.03:
       self.add_node()
 
   # Calculate compatibility of two genomes 
