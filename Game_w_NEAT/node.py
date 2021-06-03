@@ -55,6 +55,16 @@ class Node():
       return True
     return False
   
+  # Determine if self has edge leading to a given node
+  def leads_to(self, node):
+    node_id = node._id
+    for edge in self.out_bound_edges:
+      if edge.out_node._id == node_id:
+        # self is connected to node by an outbound edge
+        return True
+    # self is not connected to node
+    return False
+  
   # Determine if node is output node
   def is_output(self):
     # No edges lead out of output nodes

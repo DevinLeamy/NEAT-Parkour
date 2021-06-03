@@ -14,6 +14,9 @@ class Population():
     self.members = []
     for i in range(self.size):
       self.members.append(Agent())
+
+    # Player with the highest fitness
+    self.best_agent = Agent.deep_copy(self.members[0])
   
   # Update the population (calls game update loop)
   def update(self, game_grid, score):
@@ -27,4 +30,17 @@ class Population():
         return True 
     # All members of the population are inactive 
     return False
+  
+  # Update best player
+  def update_best_agent(self):
+    # Best agent in current generation
+    current_gen_best = self.members[0]
+    for agent in self.members[1:]:
+      if agent.fitness > current_gen_best.fitness:
+        current_gen_best = agent
+    
+    if (current_gen_best.fitness > self.best_agent.fitness):
+      # Replace current best agent 
+      self.best_agent = Agent.deep_copy(current_gen_best)
+  
 

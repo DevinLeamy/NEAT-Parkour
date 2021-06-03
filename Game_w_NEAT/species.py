@@ -12,11 +12,29 @@ class Species():
  
     self.gen_created = gen_created
     self.members = members
-      # Fitness of the species
-    self.fitness = None
-    self.adjusted_fitness = None
+    # Fitness of the species
+    self.best_fitness = 0 
+    self.average_fitness = 0 
  
     self.gen_last_improved = self.gen_created
 
     # Select random member to be the representative
     self.representative = random.choice(self.members)
+  
+  # Add agent to species
+  def add(self, agent):
+    self.members.append(agent)
+  
+  # Update species fitness
+  def update_fitness(self): 
+    assert len(self.members) != 0
+
+    # Update best fitness
+    self.best_fitness = max(self.best_fitness, max([agent.fitness for agent in self.members]))
+    # Total sum of member fitnesses
+    total_fitness = sum([agent.fitness for agent in self.members])
+
+    # Update adjusted/average fitness
+    self.average_fitness = total_fitness / len(self.members)
+  
+  

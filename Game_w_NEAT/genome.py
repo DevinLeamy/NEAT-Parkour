@@ -1,5 +1,6 @@
 from edge import Edge
 from node import Node
+from feedforward import Feedforward
 
 class Genome():
   '''
@@ -76,7 +77,18 @@ class Genome():
 
     max_inv = max([edge.inv for edge in self.edges])
     return max_inv
-  
+
+  # Add connection gene (edge) to genome
+  def add_connection(self):
+    # Create NN 
+    feedforward = Feedforward(self.nodes)
+    if feedforward.full_connected():
+      return
+    # Find compatible nodes
+    (start_node, end_node) = feedforward.get_random_compatible_nodes() 
+    
+
+
   # Calculate compatibility of two genomes 
   @staticmethod
   def compatibility(genome_1, genome_2):
