@@ -103,6 +103,8 @@ class Feedforward():
       new_layer = []
       for node in layer:
         for edge in node.out_bound_edges:
+          if not edge.active: # Only active edges participate in feedforward 
+            continue
           new_node = edge.out_node
           # Avoid duplicates
           if not new_node in new_layer:
