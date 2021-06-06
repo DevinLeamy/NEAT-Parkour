@@ -17,7 +17,6 @@ class Population():
     
     # Initialize species
     self.species = []
-    # TODO: Initialize species
 
     # Player with the highest fitness
     self.best_agent = Agent.deep_copy(self.members[0])
@@ -53,5 +52,41 @@ class Population():
       if species.staleness >= 15: # TODO: Make this variable configurable
         # Remove species
         self.species.remove(species)
+  
+  # Divide the population into species by genetic similarity
+  def speciate(self):
+    # Reset species for speciation - see reset() in species.py 
+    for species in self.species: 
+      species.reset()
+    
+    # Divide members by genetic similarity
+    for agent in self.members:
+      found_comp = False
+      for species in self.species:
+        if species.member(agent):
+          # Agent is compatible
+          species.add(agent)
+          found_comp = True
+          break
+      if not found_comp:
+        # Create new species
+        self.species.append(Species(self.generation, [agent]))
+    
+    # Update new species
+    for species in self.species:
+      species.cut_half()
+      species.update_fitness()
+    # Sort
+    self.sort_species()
+
+
+  # Natural selection - prepare for next generation
+  # Assumes the fitness of all agents has been calculated
+  def natural_selection(self):
+    pass
+
+  # Sort species by their average fitness 
+  def sort_species(self, decreasing=True):
+    self.species.sort(key=lambda species : species.fitness, reversed=decreasing)
   
 

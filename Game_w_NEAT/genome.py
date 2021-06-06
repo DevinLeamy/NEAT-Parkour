@@ -232,3 +232,4 @@ class Genome():
     # W=100 in case of divide-by-zero
     W = total_wd / total_mc if total_mc != 0 else 100
     return W
+  

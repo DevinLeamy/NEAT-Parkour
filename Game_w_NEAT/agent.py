@@ -8,6 +8,7 @@ import random
 class Agent():
   def __init__(self):
     self.fitness = 0 
+    self.adjusted_fitness = 0
     self.player = Player() 
     self.genome = Genome()
   
@@ -49,6 +50,13 @@ class Agent():
 
     # Update fitness
     self.fitness = score
+  
+  # Update adjusted fitness
+  # Assumes speciation has just taken place 
+  # members_cnt: Number of members in the same species of self
+  def update_adjusted_fitness(self, members_cnt):
+    assert members_cnt != 0
+    self.fitness /= members_cnt
   
   # Deep copy of agent
   @staticmethod
