@@ -1,6 +1,6 @@
 # Teaching Parkour... The Darwin Way
 import random
-random.seed(420)
+# random.seed(420)
 
 import pygame 
 from config import *

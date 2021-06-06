@@ -31,7 +31,7 @@ class EdgeHistory():
   @staticmethod
   def add_edge(in_node, out_node):
     in_node_id = in_node._id
-    out_node = out_node._id
+    out_node_id = out_node._id
     # Add edge
     EdgeHistory.edges.append([(in_node_id, out_node_id, EdgeHistory.global_inv)])
     # Increment global_inv
