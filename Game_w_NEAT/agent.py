@@ -6,11 +6,17 @@ from enums import Move
 import random 
 
 class Agent():
-  def __init__(self):
+  '''
+  genome: Agent's genome
+  '''
+  def __init__(self, genome=None):
+    self.genome = genome
     self.fitness = 0 
     self.adjusted_fitness = 0
     self.player = Player() 
-    self.genome = Genome()
+    
+    if self.genome == None:
+      self.genome = Genome()
   
   # Agent policy
   def policy(self):
@@ -60,7 +66,7 @@ class Agent():
   
   # Deep copy of agent
   @staticmethod
-  def deep_copy(agent):
+  def clone(agent):
     pass
 
 

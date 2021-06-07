@@ -1,6 +1,7 @@
 import random
 import math
 from genome import Genome
+from agent import Agent
 
 # Controlles a species
 class Species():
@@ -13,14 +14,19 @@ class Species():
     assert len(members) != 0
  
     self.members = members
+
     # Fitness of the species
     self.best_fitness = 0 
- 
+    self.average_fitness = 0
+
     # Number of generations since last improvement 
     self.staleness = 0 
 
     # Select random member to be the representative
     self.representative = random.choice(self.members)
+
+    # Select random agent to start as best
+    self.best_agent = random.choice(self.members)
   
   # Add agent to species
   def add(self, agent):
@@ -33,6 +39,12 @@ class Species():
     # Update best fitness
     previous_best = self.best_fitness
     self.best_fitness = max(self.best_fitness, max([agent.fitness for agent in self.members]))
+
+    # Update best agent
+    for agent in self.members:
+      if agent.fitness == self.best_fitness:
+        self.best_agent = Agent.clone()
+        break
 
     # Update stateless
     if self.best_fitness > previous_best:
@@ -72,6 +84,45 @@ class Species():
     self.sort_members()
     half = math.ceil(len(self.members) / 2) # Rounded up
     self.members = self.members[:half]
+  
+  # Calculate the number of offspring to produce 
+  # Modify?: https://github.com/CodeReclaimers/neat-python/blob/c2b79c88667a1798bfe33c00dd8e251ef8be41fa/neat/reproduction.py
+  def offspring_cnt(self, pop_size, pop_average_sum):
+    assert pop_average_sum != 0
+    return self.average_fitness // pop_average_sum * pop_size
+
+  # Produce offspring
+  def offspring(self, pop_size, pop_average_sum):
+    offspring = []
+    if len(self.members) >= 5:
+      # Fittest member move on unchanged
+      offspring.append(Agent.clone(species.best_agent))
+
+    # Produce offspring
+    offspring_cnt = self.offspring_cnt(pop_size, pop_average_sum)
+    '''
+    Produce offspring
+    - 25% result from mutation without crossover
+    - 75% (the rest) result from the crossover from two random members of the species
+    '''
+    for i in range(offspring_cnt):
+      rand = random.uniform((0, 1))
+      if rand < 0.25:
+        # Mutation without crossover
+        agent = Agent.clone(random.choice(self.members))
+        agent.genome.mutate()
+        offspring.append(agent)
+      else:
+        # Cross over - parents can be the same
+        parent_1 = Agent.clone(random.choice(self.members).genome)
+        parent_2 = Agent.clone(random.choice(self.members).genome)
+
+        offspring_genome = Genome.crossover(parent_1, parent_2) # TODO: Implement crossover
+
+    
+    return offspring
+
+
 
 
   

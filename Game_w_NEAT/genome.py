@@ -233,3 +233,7 @@ class Genome():
     W = total_wd / total_mc if total_mc != 0 else 100
     return W
   
+  # Deep copy of genome
+  @staticmethod
+  def clone(genome):
+    pass
