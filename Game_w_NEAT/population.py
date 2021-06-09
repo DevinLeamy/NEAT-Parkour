@@ -1,4 +1,5 @@
 from agent import Agent
+from species import Species
 
 # Controller of all members of the population
 class Population():
@@ -39,6 +40,7 @@ class Population():
   
   # Update best player
   def update_best_agent(self):
+    assert len(self.species[0].members) != 0
     # Best agent in current generation
     current_gen_best = self.species[0].members[0] # Random member
 
@@ -63,7 +65,7 @@ class Population():
   def prune_low_preforming_species(self):
     pop_size = self.get_population_size()
     for species in self.species:
-      if species.calculate_offstring_count(pop_size, self.species_average_sum) == 0:
+      if species.offspring_cnt(pop_size, self.species_average_sum) == 0:
         # No offspring
         self.species.remove(species)
   
@@ -95,6 +97,10 @@ class Population():
     
     # Update new species
     for species in self.species:
+      if len(species.members) == 0:
+        self.species.remove(species)
+        continue
+      print("Species members: %d" % (len(species.members)))
       species.cut_half()
       species.update_fitness()
 
@@ -107,6 +113,7 @@ class Population():
   def natural_selection(self):
     self.speciate()
     self.prune_species()
+    print("Remaining species count: %d" % len(self.species))
     self.update_best_agent()
   
     # Agents for next generation
@@ -115,13 +122,14 @@ class Population():
     for species in self.species:
       if len(species.members) >= 5:
         # Fitest member moves on unchanged
-        offspring.append(species.best_agent)
+        offspring.append(Agent.clone(species.best_agent))
       
       pop_size = self.get_population_size()
       # Add offspring
       offspring.extend(species.offspring(pop_size, self.species_average_sum))
   
     # Replace population with offspring
+    print("Number of offspring: %d" % len(offspring))
     self.members = offspring
 
   # Update species averages sum
@@ -136,6 +144,6 @@ class Population():
   
   # Sort species by their average fitness 
   def sort_species(self, decreasing=True):
-    self.species.sort(key=lambda species : species.fitness, reversed=decreasing)
+    self.species.sort(key=lambda species : species.average_fitness, reverse=decreasing)
   
 

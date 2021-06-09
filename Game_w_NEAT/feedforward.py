@@ -24,12 +24,12 @@ class Feedforward():
       node.activate()
     
     # Determine output (decision)
-    output_nodes = self.layers[-1]
+    out_nodes = self.layers[-1]
 
     # Find idx of output node with max value
     decision = 0
     max_val = out_nodes[0].out_val
-    for idx, node in enumerate(output_nodes[1:]):
+    for idx, node in enumerate(out_nodes[1:]):
       if max_val < node.out_val:
         max_val = node.out_val
         decision = idx

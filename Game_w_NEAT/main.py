@@ -1,6 +1,6 @@
 # Teaching Parkour... The Darwin Way
 import random
-# random.seed(420)
+random.seed(420)
 
 import pygame 
 from config import *
@@ -34,7 +34,8 @@ class Game:
     # Create sprite group
     self.sprites = pygame.sprite.Group()
 
-    self.population = Population(size=150) 
+    self.population = Population(size=POPULATION) 
+
     # Add players to sprite group
     for agent in self.population.members:
       # Note: Agent is the NEAT class that wraps Player, the sprite that plays the game
@@ -85,7 +86,7 @@ class Game:
     # Set defaults
     self.updates = 0
     self.game_map = Map()
-    self.sprites = pygame.sprites.Group()
+    self.sprites = pygame.sprite.Group()
 
     # Update population 
     self.population.natural_selection()
@@ -119,7 +120,8 @@ game = Game()
 state = State.RUNNING 
 
 # 100 = number of generations
-for gen in self.range(100):
+for gen in range(GENERATIONS):
+  print("Generation: %d" % gen)
   # Game loop
   while True:
     for event in pygame.event.get():

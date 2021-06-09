@@ -43,19 +43,19 @@ class Species():
     # Update best agent
     for agent in self.members:
       if agent.fitness == self.best_fitness:
-        self.best_agent = Agent.clone()
+        self.best_agent = Agent.clone(agent)
         break
 
-    # Update stateless
+    # Update staleness 
     if self.best_fitness > previous_best:
       # Improved
       self.staleness = 0
     else:
-      self.stateless += 1
+      self.staleness += 1
     
     # Fitness sharing 
     for agent in self.members:
-      agent.update_adjusted_fitness()
+      agent.update_adjusted_fitness(len(self.members))
       
     # Total sum of member fitnesses
     total_fitness = sum([agent.fitness for agent in self.members])
@@ -77,7 +77,7 @@ class Species():
   
   # Sort members by their average fitness 
   def sort_members(self, decreasing=True):
-    self.members.sort(key=lambda member : member.fitness, reversed=decreasing)
+    self.members.sort(key=lambda member : member.fitness, reverse=decreasing)
   
   # Removes the lowest preforming 50% - not sure whether this figure is comming from
   def cut_half(self):
@@ -89,14 +89,15 @@ class Species():
   # Modify?: https://github.com/CodeReclaimers/neat-python/blob/c2b79c88667a1798bfe33c00dd8e251ef8be41fa/neat/reproduction.py
   def offspring_cnt(self, pop_size, pop_average_sum):
     assert pop_average_sum != 0
-    return self.average_fitness // pop_average_sum * pop_size
+    # * 2 is for testing
+    return int(self.average_fitness // pop_average_sum * pop_size) * 2
 
   # Produce offspring
   def offspring(self, pop_size, pop_average_sum):
     offspring = []
     if len(self.members) >= 5:
       # Fittest member move on unchanged
-      offspring.append(Agent.clone(species.best_agent))
+      offspring.append(Agent.clone(self.best_agent))
 
     # Produce offspring
     offspring_cnt = self.offspring_cnt(pop_size, pop_average_sum)
@@ -106,22 +107,24 @@ class Species():
     - 75% (the rest) result from the crossover from two random members of the species
     '''
     for i in range(offspring_cnt):
-      rand = random.uniform((0, 1))
+      rand = random.uniform(0, 1)
       if rand < 0.25:
         # Mutation without crossover
         child = Agent.clone(random.choice(self.members))
         child.genome.mutate()
-        offspring.append(agent)
+        offspring.append(child)
+        assert child.player.alive
       else:
         # Cross over - parents can be the same
         # Parents are not clones because their data does not change 
-        parent_1 = random.choice(self.members).genome
-        parent_2 = random.choice(self.members).genome
+        parent_1 = random.choice(self.members)
+        parent_2 = random.choice(self.members)
 
         child_genome = Genome.crossover(parent_1, parent_2) 
         child = Agent(genome=child_genome)
         offspring.append(child)
-    
+        assert child.player.alive
+
     return offspring
 
 
