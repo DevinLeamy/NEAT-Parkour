@@ -109,15 +109,18 @@ class Species():
       rand = random.uniform((0, 1))
       if rand < 0.25:
         # Mutation without crossover
-        agent = Agent.clone(random.choice(self.members))
-        agent.genome.mutate()
+        child = Agent.clone(random.choice(self.members))
+        child.genome.mutate()
         offspring.append(agent)
       else:
         # Cross over - parents can be the same
-        parent_1 = Agent.clone(random.choice(self.members).genome)
-        parent_2 = Agent.clone(random.choice(self.members).genome)
+        # Parents are not clones because their data does not change 
+        parent_1 = random.choice(self.members).genome
+        parent_2 = random.choice(self.members).genome
 
-        offspring_genome = Genome.crossover(parent_1, parent_2) # TODO: Implement crossover
+        child_genome = Genome.crossover(parent_1, parent_2) 
+        child = Agent(genome=child_genome)
+        offspring.append(child)
 
     
     return offspring

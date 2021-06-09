@@ -71,3 +71,7 @@ class Node():
     if len(self.out_bound_edges) == 0:
       return True
     return False
+  
+  # Create deep copy of node 
+  def clone(self):
+    pass

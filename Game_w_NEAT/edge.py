@@ -76,3 +76,13 @@ class Edge():
   @staticmethod
   def weight_distance(edge_1, edge_2):
     return abs(edge_1.weight - edge_2.weight)
+  
+  # High-level edge data as list - see genome.py crossover method for use
+  # [in_node_id, out_node_id, active, weight]
+  @staticmethod
+  def data(edge):
+    in_node_id = edge.in_node._id
+    out_node_id = edge.out_node._id
+    active = edge.active
+    weight = edge.weight
+    return [in_node_id, out_node_id, active, weight]
