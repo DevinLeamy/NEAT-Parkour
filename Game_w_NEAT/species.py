@@ -121,7 +121,6 @@ class Species():
         child_genome = Genome.crossover(parent_1, parent_2) 
         child = Agent(genome=child_genome)
         offspring.append(child)
-
     
     return offspring
 

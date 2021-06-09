@@ -253,17 +253,10 @@ class Genome():
     genome_1 = parent_1.genome
     genome_2 = parent_2.genome
     
-    # Max innovation numbers
-    max_1 = parent_1.get_max_inv()
-    max_2 = parent_2.get_max_inv()
-
-    child = Genome(initialize_nodes=False)
     # List of edge data - makes cloning easier
     # [[in_node_id, out_node_id, active, weight]]
     child_edges_data = []
     '''
-    This might be better faciliated through use of a clone method, that does the same thing
-
     With genome_1 being that of the fitter of the two parents, crossover is defined as follows:
     - If both parents have a gene (edge), it is inherited from either parent with a 50% chance. 
     - If the edge was disabled in either parent, there is a 75% chance it will be disabled in the child. 
@@ -292,18 +285,39 @@ class Genome():
         new_edge_data = edge.data()
         child_edges_data.append(new_edge_data)
     
-    # Clone all nodes in child - based on edges_data
+    # Create clone
+    child = Genome.clone_from_edges_data(child_edges_data)
+    return child
+  
+  # Deep copy of genome
+  @staticmethod
+  def clone(genome):
+    # List of edge data - makes cloning easier
+    # [[in_node_id, out_node_id, active, weight]]
+    edges_data = []
+    for edge in genome.edges:
+      edge_data = edge.data()
+      edges_data.append(edge_data) 
+
+    clone = Genome.clone_from_edges_data(edges_data)
+    return clone
+  
+  # Create genomes from edge data - listof [in_node_id, out_node_id, active, weight]
+  @staticmethod
+  def clone_from_edges_data(edges_data):
+    clone = Genome(initialize_weights=False)
     # Collect id's of all nodes used - edge_data[0]: in_node_id, edge_data[0]: out_node_id
-    child_node_ids = set([edge_data[0] for edge_data in child_edges_data] + 
-                         [edge_data[1] for edge_data in child_edges_data])
-    child_nodes = [Node(_id) for _id in child_node_ids]
+    node_ids = set([edge_data[0] for edge_data in edges_data] + 
+                    [edge_data[1] for edge_data in edges_data])
+    # Create nodes
+    nodes = [Node(_id) for _id in node_ids]
 
     # Create all edges and add edges to nodes
-    child_edges = []
-    for in_node_id, out_node_id, active, weight in child_edges_data:
+    edges = []
+    for in_node_id, out_node_id, active, weight in edges_data:
       # Get nodes - O(n), can be improved
-      in_node = next((node for node in child_nodes if node._id == in_node_id))
-      out_node = next((node for node in child_nodes if node._id == out_node_id))
+      in_node = next((node for node in nodes if node._id == in_node_id))
+      out_node = next((node for node in nodes if node._id == out_node_id))
 
       # Create edge 
       edge = Edge(in_node, out_node, active, weight)
@@ -312,15 +326,10 @@ class Genome():
       in_node.add_edge(edge)
       out_node.add_edge(edge)
 
-      child_edges.append(edge)
+      edges.append(edge)
 
     # Update child genome with edges and nodes 
-    child.set_edges(child_edges)
-    child.set_nodes(child_nodes)
+    clone.set_edges(child_edges)
+    clone.set_nodes(child_nodes)
     
-    return child
-  
-  # Deep copy of genome
-  @staticmethod
-  def clone(genome):
-    pass
+    return clone 
