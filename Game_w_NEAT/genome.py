@@ -17,15 +17,15 @@ class Genome():
   in_nodes: Number of input nodes
   out_nodes: Number of output nodes
   '''
-  def __init__(self, in_nodes=6, out_nodes=6):
+  def __init__(self, in_nodes=6, out_nodes=6, initialize_nodes=True):
     self.in_nodes = in_nodes
     self.out_nodes = out_nodes
 
-    # Potential problem - if an edge is changes, it must be change in the Genome 
-    # and in all the nodes which it serves to connect. In order words, we need to keep the 
-    # data updated in two places. If python3 operates strictly by reference, then this isn't a problem
     self.nodes = []
     self.edges = []
+
+    if not initialize_nodes:
+      return
 
     # Create input nodes
     in_nodes = []
@@ -172,7 +172,7 @@ class Genome():
     edges_1 = genome_1.edges
     edges_2 = genome_2.edges
 
-    # Get max innovation numbers 
+    # Max innovation numbers 
     max_1 = genome_1.get_max_inv()
     max_2 = genome_2.get_max_inv()
 
@@ -185,7 +185,7 @@ class Genome():
     E = 0
     D = 0
     for edge in edges_1:
-      if genome_1.has_matching(edge):
+      if genome_2.has_matching(edge):
         continue 
       # Increment disjoint and excess
       if edge.inv <= max_2:
@@ -194,7 +194,7 @@ class Genome():
         E += 1
 
     for edge in edges_2:
-      if genome_2.has_matching(edge):
+      if genome_1.has_matching(edge):
         continue
       # Increment disjoint and excess
       if edge.inv <= max_1:
@@ -208,7 +208,15 @@ class Genome():
     # Compatibility
     comp = (Genome.c1 * E) / N + (Genome.c2 * D) / N + (Genome.c3 * W)
     return comp
+
+  # Set edges - for clarity
+  def set_edges(self, new_edges):
+    self.edges = new_edges
   
+  # Set nodes - for clarity
+  def set_nodes(self, new_nodes):
+    self.nodes = new_nodes
+
   # Determine if genes are compatible - i.e. of the same species
   @staticmethod
   def compatible(gene_1, gene_2):
@@ -233,7 +241,95 @@ class Genome():
     W = total_wd / total_mc if total_mc != 0 else 100
     return W
   
+  # Create crossover genome of two parents
+  @staticmethod
+  def crossover(parent_1, parent_2):
+    # Make parent_1 the better preforming of the parents
+    if parent_2.fitness > parent_1.fitness:
+      # Swap
+      parent_1, parent_2 = parent_2, parent_1
+    
+    # Get genomes
+    genome_1 = parent_1.genome
+    genome_2 = parent_2.genome
+    
+    # List of edge data - makes cloning easier
+    # [[in_node_id, out_node_id, active, weight]]
+    child_edges_data = []
+    '''
+    With genome_1 being that of the fitter of the two parents, crossover is defined as follows:
+    - If both parents have a gene (edge), it is inherited from either parent with a 50% chance. 
+    - If the edge was disabled in either parent, there is a 75% chance it will be disabled in the child. 
+    - If genome_1 has excess or disjoint genes, they are also inherited.
+    '''
+    for edge in genome_1.edges:
+      if genome_2.has_matching(edge):
+        # Has matching edge
+        matching_edge = genome_2.get_matching(edge) 
+
+        # Randomly select parent to give edge
+        rand = random.uniform((0, 1)) 
+        new_edge_data = Edge.data(edge) if rand > 0.5 else Edge.data(matching_edge) # See edge.py for format
+
+        if not edge.active or not matching_edge.active:
+          # Determine state of new edge
+          rand = random.uniform((0, 1))
+          # new_edge_data[2] holds edge state
+          if rand < 0.75:
+            new_edge_data[2] = False 
+          else:
+            new_edge_data[2] = True
+        child_edges_data.append(new_edge_data)
+      else:
+        # Excess or disjoint gene
+        new_edge_data = edge.data()
+        child_edges_data.append(new_edge_data)
+    
+    # Create clone
+    child = Genome.clone_from_edges_data(child_edges_data)
+    return child
+  
   # Deep copy of genome
   @staticmethod
   def clone(genome):
-    pass
+    # List of edge data - makes cloning easier
+    # [[in_node_id, out_node_id, active, weight]]
+    edges_data = []
+    for edge in genome.edges:
+      edge_data = edge.data()
+      edges_data.append(edge_data) 
+
+    clone = Genome.clone_from_edges_data(edges_data)
+    return clone
+  
+  # Create genomes from edge data - listof [in_node_id, out_node_id, active, weight]
+  @staticmethod
+  def clone_from_edges_data(edges_data):
+    clone = Genome(initialize_weights=False)
+    # Collect id's of all nodes used - edge_data[0]: in_node_id, edge_data[0]: out_node_id
+    node_ids = set([edge_data[0] for edge_data in edges_data] + 
+                    [edge_data[1] for edge_data in edges_data])
+    # Create nodes
+    nodes = [Node(_id) for _id in node_ids]
+
+    # Create all edges and add edges to nodes
+    edges = []
+    for in_node_id, out_node_id, active, weight in edges_data:
+      # Get nodes - O(n), can be improved
+      in_node = next((node for node in nodes if node._id == in_node_id))
+      out_node = next((node for node in nodes if node._id == out_node_id))
+
+      # Create edge 
+      edge = Edge(in_node, out_node, active, weight)
+
+      # Add edge to nodes
+      in_node.add_edge(edge)
+      out_node.add_edge(edge)
+
+      edges.append(edge)
+
+    # Update child genome with edges and nodes 
+    clone.set_edges(child_edges)
+    clone.set_nodes(child_nodes)
+    
+    return clone 

@@ -64,9 +64,11 @@ class Agent():
     assert members_cnt != 0
     self.fitness /= members_cnt
   
-  # Deep copy of agent
+  # Copy of agent - only genome is copied, remaining values are defaults
   @staticmethod
   def clone(agent):
-    pass
+    genome = Genome.clone(agent.genome)
+    clone = Agent(genome)
+    return clone
 
 

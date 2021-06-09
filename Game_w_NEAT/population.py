@@ -119,7 +119,7 @@ class Population():
       
       pop_size = self.get_population_size()
       # Add offspring
-      offspring.extend(speces.offspring(pop_size, self.species_average_sum))
+      offspring.extend(species.offspring(pop_size, self.species_average_sum))
   
     # Replace population with offspring
     self.members = offspring
