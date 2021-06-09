@@ -79,6 +79,21 @@ class Game:
 
     # Update game status, game continues so long as the population has active members
     self.done = not self.population.has_active()
+  
+  # Reset for the next generation
+  def next_generation(self):
+    # Set defaults
+    self.updates = 0
+    self.game_map = Map()
+    self.sprites = pygame.sprites.Group()
+
+    # Update population 
+    self.population.natural_selection()
+
+    # Add players to sprite group
+    for agent in self.population.members:
+      # Note: Agent is the NEAT class that wraps Player, the sprite that plays the game
+      self.sprites.add(agent.player)
 
   # Draw game state
   def draw(self):
@@ -103,20 +118,24 @@ CLK = pygame.time.Clock()
 game = Game()
 state = State.RUNNING 
 
-# Game loop
-while True:
-  for event in pygame.event.get():
-    if event.type == pygame.QUIT:
-      running = False
-   
-  # Displaying
-  SCN.blit(LOAD.load_image("Tiles/Background.png"), (0, 0))
-  game.update() 
-  if game.done:
-    # Game Over
-    break
-  pygame.display.update()
+# 100 = number of generations
+for gen in self.range(100):
+  # Game loop
+  while True:
+    for event in pygame.event.get():
+      if event.type == pygame.QUIT:
+        running = False
+    
+    # Displaying
+    SCN.blit(LOAD.load_image("Tiles/Background.png"), (0, 0))
+    game.update() 
+    if game.done:
+      # Game Over
+      break
+    pygame.display.update()
 
-  # Set speed
-  CLK.tick(DELAY)
+    # Set speed
+    CLK.tick(DELAY)
+  game.next_generation()
+
 pygame.display.quit()
