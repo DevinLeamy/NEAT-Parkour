@@ -1,3 +1,6 @@
+import math
+import numpy as np
+
 # Single node in NN 
 class Node():
   '''
@@ -15,7 +18,7 @@ class Node():
 
   # Modified sigmoid function 
   def sigmoid(self, x):
-    y = 1 / (1 + exp(-4.9 * x)) 
+    y = 1 / (1 + np.exp(-4.9 * x)) 
     return y
   
   # Call activation function and set result

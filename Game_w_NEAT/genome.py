@@ -1,6 +1,7 @@
 from edge import Edge
 from node import Node
 from feedforward import Feedforward
+import random
 
 class Genome():
   '''
@@ -17,9 +18,9 @@ class Genome():
   in_nodes: Number of input nodes
   out_nodes: Number of output nodes
   '''
-  def __init__(self, in_nodes=6, out_nodes=6, initialize_nodes=True):
-    self.in_nodes = in_nodes
-    self.out_nodes = out_nodes
+  def __init__(self, in_nodes_cnt=6, out_nodes_cnt=6, initialize_nodes=True):
+    self.in_nodes_cnt = in_nodes_cnt
+    self.out_nodes_cnt = out_nodes_cnt
 
     self.nodes = []
     self.edges = []
@@ -29,15 +30,13 @@ class Genome():
 
     # Create input nodes
     in_nodes = []
-    for i in range(self.in_nodes):
-      in_nodes.append(Node(Genome.next_id))
-      Genome.next_id += 1
+    for i in range(self.in_nodes_cnt):
+      in_nodes.append(Node(i)) # Input node ids remain the same
     
     # Create output nodes
     out_nodes = []
-    for i in range(self.out_nodes):
-      out_nodes.append(Node(Genome.next_id))
-      Genome.next_id += 1
+    for i in range(self.out_nodes_cnt):
+      out_nodes.append(Node(self.in_nodes_cnt + i)) # Output node ids remain the same
     
     # Initialize edges
     for in_node in in_nodes:
@@ -108,11 +107,14 @@ class Genome():
     in_bound_edge = Edge(in_node, new_node, weight=1)
     out_bound_edge = Edge(new_node, in_node, weight=weight) 
 
-    # Add edges to nodes
+    # Add edges to nodes and genome
+    self.edges.append(in_bound_edge)
+    self.edges.append(out_bound_edge)
+    
     in_node.add_edge(in_bound_edge)
     out_node.add_edge(out_bound_edge)
-    new_node.add(in_bound_edge)
-    new_node.add(out_bound_edge)
+    new_node.add_edge(in_bound_edge)
+    new_node.add_edge(out_bound_edge)
 
   # Get all active edges in genome
   def all_edges(self):
@@ -128,17 +130,26 @@ class Genome():
 
   # Add connection gene (edge) to genome
   def add_connection(self):
+    # print("Adding connection")
+
     # Create NN 
     feedforward = Feedforward(self.nodes)
-    if feedforward.full_connected():
+    if feedforward.fully_connected():
       return
     # Find compatible nodes
     (start_node, end_node) = feedforward.get_random_compatible_nodes() 
 
-    # Create and add new edge
+    # Create new edge
     new_edge = Edge(in_node, out_node) 
+
+    # Add edge to nodes and genome
+    print(len(edges)) # DEBUG
+    self.edges.append(new_edge)
+    print(len(edges)) # DEBUG
+
     start_node.add_edge(new_edge)
     end_node.add_edge(new_edge)
+
   
   # TODO: Make probabilities configurable
   # Mutate genome 
@@ -160,6 +171,7 @@ class Genome():
     rand = random.uniform(0, 1)
     if rand < 0.05:
       self.add_connection()
+      # print(len(self.edges)) # DEBUG
     
     # Add node
     rand = random.uniform(0, 1)
@@ -172,14 +184,25 @@ class Genome():
     edges_1 = genome_1.edges
     edges_2 = genome_2.edges
 
+    # edge_1_inf = [Edge.data(edge)[:2] for edge in edges_1] # DEBUG
+    # edge_2_inf = [Edge.data(edge)[:2] for edge in edges_2] # DEBUG
+
+    # print(edge_1_inf) # DEBUG
+
+    # print(edge_2_inf) # DEBUG 
+
+    # print(len(edges_1), len(edges_2)) # DEBUG
+
     # Max innovation numbers 
-    max_1 = genome_1.get_max_inv()
-    max_2 = genome_2.get_max_inv()
+    max_1 = genome_1.max_inv()
+    max_2 = genome_2.max_inv()
 
     # Normalizing factor
     N = max(len(edges_1), len(edges_2))
     if N <= 20:
       N = 1
+    
+    # N = 1 # DEBUG
 
     # Number of excess and disjoint genes between parents
     E = 0
@@ -205,8 +228,12 @@ class Genome():
     # Average weight distance
     W = Genome.average_weight_d(genome_1, genome_2)
 
+    if E != 0 or D != 0: # DEBUG
+      print("HERE") # DEBUG
+
     # Compatibility
     comp = (Genome.c1 * E) / N + (Genome.c2 * D) / N + (Genome.c3 * W)
+    print("E: %f, D: %f, W: %f, Compatibility: %f" % (E, D, W, comp))
     return comp
 
   # Set edges - for clarity
@@ -268,12 +295,12 @@ class Genome():
         matching_edge = genome_2.get_matching(edge) 
 
         # Randomly select parent to give edge
-        rand = random.uniform((0, 1)) 
+        rand = random.uniform(0, 1) 
         new_edge_data = Edge.data(edge) if rand > 0.5 else Edge.data(matching_edge) # See edge.py for format
 
         if not edge.active or not matching_edge.active:
           # Determine state of new edge
-          rand = random.uniform((0, 1))
+          rand = random.uniform(0, 1)
           # new_edge_data[2] holds edge state
           if rand < 0.75:
             new_edge_data[2] = False 
@@ -282,7 +309,7 @@ class Genome():
         child_edges_data.append(new_edge_data)
       else:
         # Excess or disjoint gene
-        new_edge_data = edge.data()
+        new_edge_data = Edge.data(edge)
         child_edges_data.append(new_edge_data)
     
     # Create clone
@@ -296,7 +323,7 @@ class Genome():
     # [[in_node_id, out_node_id, active, weight]]
     edges_data = []
     for edge in genome.edges:
-      edge_data = edge.data()
+      edge_data = Edge.data(edge)
       edges_data.append(edge_data) 
 
     clone = Genome.clone_from_edges_data(edges_data)
@@ -305,10 +332,10 @@ class Genome():
   # Create genomes from edge data - listof [in_node_id, out_node_id, active, weight]
   @staticmethod
   def clone_from_edges_data(edges_data):
-    clone = Genome(initialize_weights=False)
+    clone = Genome(initialize_nodes=False)
     # Collect id's of all nodes used - edge_data[0]: in_node_id, edge_data[0]: out_node_id
     node_ids = set([edge_data[0] for edge_data in edges_data] + 
-                    [edge_data[1] for edge_data in edges_data])
+                   [edge_data[1] for edge_data in edges_data])
     # Create nodes
     nodes = [Node(_id) for _id in node_ids]
 
@@ -329,7 +356,7 @@ class Genome():
       edges.append(edge)
 
     # Update child genome with edges and nodes 
-    clone.set_edges(child_edges)
-    clone.set_nodes(child_nodes)
+    clone.set_edges(edges)
+    clone.set_nodes(nodes)
     
     return clone 

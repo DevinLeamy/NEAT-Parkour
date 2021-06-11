@@ -19,10 +19,10 @@ class Agent():
       self.genome = Genome()
   
   # Agent policy
-  def policy(self):
-    return random.choice(range(4)) # For testing
+  def policy(self, game_map):
+    # return random.choice(range(4)) # For testing
     # Collection inputs and convert to an array
-    inputs = self.player.measure()
+    inputs = self.player.measure(game_map)
     input_arr = inputs.as_array()
 
     # Create NN (phenotype) based on nodes and edges (genotype)
@@ -48,7 +48,7 @@ class Agent():
       return 
 
     # Use genome-determined policy 
-    move = self.policy()
+    move = self.policy(game_map)
 
     # Make move and update
     self.player.move(game_map, move)

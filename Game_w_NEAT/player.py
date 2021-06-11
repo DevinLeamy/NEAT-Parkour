@@ -279,4 +279,5 @@ class Player(pygame.sprite.Sprite):
       type3=grid[Level.GRND - 3][self.LEFT_BUFFER + 2].get_block_type(),
       # Next block col
       dist=grid[Level.GRND - 1][self.LEFT_BUFFER + 2].get_block_start()
+      # TODO: Add current score
     )

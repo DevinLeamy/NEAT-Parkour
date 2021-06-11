@@ -22,7 +22,7 @@ class EdgeHistory():
     for edge in EdgeHistory.edges:
       if edge[0] == in_node_id and edge[1] == out_node_id:
         # Return innovation number
-        return edge[1] 
+        return edge[2] 
     # New edge
     return -1
   
@@ -30,10 +30,11 @@ class EdgeHistory():
   # Returns previous global_inv (see edge.py for use)
   @staticmethod
   def add_edge(in_node, out_node):
+    # print("Global innovation number: %d" % EdgeHistory.global_inv)
     in_node_id = in_node._id
     out_node_id = out_node._id
     # Add edge
-    EdgeHistory.edges.append([(in_node_id, out_node_id, EdgeHistory.global_inv)])
+    EdgeHistory.edges.append((in_node_id, out_node_id, EdgeHistory.global_inv))
     # Increment global_inv
     EdgeHistory.global_inv += 1
     return EdgeHistory.global_inv - 1
