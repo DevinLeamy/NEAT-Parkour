@@ -67,12 +67,13 @@ class Population():
     for species in self.species:
       if species.offspring_cnt(pop_size, self.species_average_sum) == 0:
         # No offspring
+        print("ERE") # DEBUG
         self.species.remove(species)
   
   # Prune week species
   def prune_species(self):
+    self.prune_low_preforming_species() 
     self.prune_stale_species()
-    self.prune_low_preforming_species()
     # Average sum may have changed
     self.update_species_averages_sum()
   

@@ -79,7 +79,6 @@ class Genome():
   
   # Add new node
   def add_node(self):
-    print("Add node")
     edges = self.all_edges()
     assert len(edges) != 0
 
@@ -108,7 +107,10 @@ class Genome():
     in_bound_edge = Edge(in_node, new_node, weight=1)
     out_bound_edge = Edge(new_node, in_node, weight=weight) 
 
-    # Add edges to nodes
+    # Add edges to nodes and genome
+    self.edges.append(in_bound_edge)
+    self.edges.append(out_bound_edge)
+    
     in_node.add_edge(in_bound_edge)
     out_node.add_edge(out_bound_edge)
     new_node.add_edge(in_bound_edge)
@@ -128,7 +130,7 @@ class Genome():
 
   # Add connection gene (edge) to genome
   def add_connection(self):
-    print("Add connection")
+    # print("Adding connection")
 
     # Create NN 
     feedforward = Feedforward(self.nodes)
@@ -137,10 +139,17 @@ class Genome():
     # Find compatible nodes
     (start_node, end_node) = feedforward.get_random_compatible_nodes() 
 
-    # Create and add new edge
+    # Create new edge
     new_edge = Edge(in_node, out_node) 
+
+    # Add edge to nodes and genome
+    print(len(edges)) # DEBUG
+    self.edges.append(new_edge)
+    print(len(edges)) # DEBUG
+
     start_node.add_edge(new_edge)
     end_node.add_edge(new_edge)
+
   
   # TODO: Make probabilities configurable
   # Mutate genome 
@@ -162,6 +171,7 @@ class Genome():
     rand = random.uniform(0, 1)
     if rand < 0.05:
       self.add_connection()
+      # print(len(self.edges)) # DEBUG
     
     # Add node
     rand = random.uniform(0, 1)
@@ -174,6 +184,15 @@ class Genome():
     edges_1 = genome_1.edges
     edges_2 = genome_2.edges
 
+    # edge_1_inf = [Edge.data(edge)[:2] for edge in edges_1] # DEBUG
+    # edge_2_inf = [Edge.data(edge)[:2] for edge in edges_2] # DEBUG
+
+    # print(edge_1_inf) # DEBUG
+
+    # print(edge_2_inf) # DEBUG 
+
+    # print(len(edges_1), len(edges_2)) # DEBUG
+
     # Max innovation numbers 
     max_1 = genome_1.max_inv()
     max_2 = genome_2.max_inv()
@@ -182,6 +201,8 @@ class Genome():
     N = max(len(edges_1), len(edges_2))
     if N <= 20:
       N = 1
+    
+    # N = 1 # DEBUG
 
     # Number of excess and disjoint genes between parents
     E = 0
@@ -207,9 +228,12 @@ class Genome():
     # Average weight distance
     W = Genome.average_weight_d(genome_1, genome_2)
 
+    if E != 0 or D != 0: # DEBUG
+      print("HERE") # DEBUG
+
     # Compatibility
     comp = (Genome.c1 * E) / N + (Genome.c2 * D) / N + (Genome.c3 * W)
-    # print("E: %f, D: %f, W: %f, Compatibility: %f" % (E, D, W, comp))
+    print("E: %f, D: %f, W: %f, Compatibility: %f" % (E, D, W, comp))
     return comp
 
   # Set edges - for clarity
@@ -285,7 +309,7 @@ class Genome():
         child_edges_data.append(new_edge_data)
       else:
         # Excess or disjoint gene
-        new_edge_data = edge.data()
+        new_edge_data = Edge.data(edge)
         child_edges_data.append(new_edge_data)
     
     # Create clone
@@ -311,7 +335,7 @@ class Genome():
     clone = Genome(initialize_nodes=False)
     # Collect id's of all nodes used - edge_data[0]: in_node_id, edge_data[0]: out_node_id
     node_ids = set([edge_data[0] for edge_data in edges_data] + 
-                    [edge_data[1] for edge_data in edges_data])
+                   [edge_data[1] for edge_data in edges_data])
     # Create nodes
     nodes = [Node(_id) for _id in node_ids]
 

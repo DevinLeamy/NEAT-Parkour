@@ -89,8 +89,9 @@ class Species():
   # Modify?: https://github.com/CodeReclaimers/neat-python/blob/c2b79c88667a1798bfe33c00dd8e251ef8be41fa/neat/reproduction.py
   def offspring_cnt(self, pop_size, pop_average_sum):
     assert pop_average_sum != 0
+    print(self.average_fitness / pop_average_sum, self.average_fitness, pop_size) # DEBUG
     # * 2 is for testing
-    return int(self.average_fitness // pop_average_sum * pop_size) * 2
+    return int(self.average_fitness / pop_average_sum * pop_size) * 2
 
   # Produce offspring
   def offspring(self, pop_size, pop_average_sum):

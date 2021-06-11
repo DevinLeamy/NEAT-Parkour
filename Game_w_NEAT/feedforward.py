@@ -19,7 +19,7 @@ class Feedforward():
         # For input node, _id acts as index in input values list
         node.feed_input(inputs[node._id])
     
-    assert sum([1 for node in self.nodes if node.is_input()]) == 6 # DEBUG
+    # assert sum([1 for node in self.nodes if node.is_input()]) == 6 # DEBUG
 
     # Preform feedforward over layers of NN 
     for layer in self.layers:
