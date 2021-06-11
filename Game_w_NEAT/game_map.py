@@ -3,6 +3,8 @@ import random
 from enums import Level, Tile, Ob
 from config import *
 
+random.seed(420)
+
 # Map
 class Map:
   def __init__(self):

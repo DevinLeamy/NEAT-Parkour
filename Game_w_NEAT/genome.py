@@ -79,6 +79,7 @@ class Genome():
   
   # Add new node
   def add_node(self):
+    print("Add node")
     edges = self.all_edges()
     assert len(edges) != 0
 
@@ -127,6 +128,8 @@ class Genome():
 
   # Add connection gene (edge) to genome
   def add_connection(self):
+    print("Add connection")
+
     # Create NN 
     feedforward = Feedforward(self.nodes)
     if feedforward.fully_connected():
@@ -206,7 +209,7 @@ class Genome():
 
     # Compatibility
     comp = (Genome.c1 * E) / N + (Genome.c2 * D) / N + (Genome.c3 * W)
-    # print("E: %f, D: %f, W: %f, Compatibility: %d" % (E, D, W, comp))
+    # print("E: %f, D: %f, W: %f, Compatibility: %f" % (E, D, W, comp))
     return comp
 
   # Set edges - for clarity

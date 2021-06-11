@@ -18,10 +18,13 @@ class Feedforward():
       if node.is_input():
         # For input node, _id acts as index in input values list
         node.feed_input(inputs[node._id])
+    
+    assert sum([1 for node in self.nodes if node.is_input()]) == 6 # DEBUG
 
     # Preform feedforward over layers of NN 
     for layer in self.layers:
-      node.activate()
+      for node in layer:
+        node.activate()
     
     # Determine output (decision)
     out_nodes = self.layers[-1]
@@ -33,7 +36,6 @@ class Feedforward():
       if max_val < node.out_val:
         max_val = node.out_val
         decision = idx
-    
     return decision
 
   # Check if network is full connected
@@ -98,6 +100,7 @@ class Feedforward():
     layer = [node for node in self.nodes if node.is_input()]
     self.layers.append(layer)
     
+    seen = set() # For debugging
     # BFS
     while (len(layer) != 0):
       new_layer = []
@@ -107,11 +110,13 @@ class Feedforward():
             continue
           new_node = edge.out_node
           # Avoid duplicates
-          if not new_node in new_layer:
+          if not new_node in new_layer and not new_node._id in seen: # For debugging
             new_layer.append(new_node)
+            seen.add(new_node._id) # For debugging
       if len(new_layer) != 0:
         self.layers.append(new_layer)
       layer = new_layer
+    # print("Layers: ", len(self.layers))
 
 
     
