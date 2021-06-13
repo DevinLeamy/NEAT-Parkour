@@ -6,10 +6,19 @@ from agent_input import Input
 
 # Player 
 class Player(pygame.sprite.Sprite):
+  # _id of the next player to be created
+  next_player_id = 0
+
   def __init__(self):
     super(Player, self).__init__()
     # Status
     self.alive = True
+
+    # Set _id
+    self._id = Player.next_player_id
+
+    # Update next id counter
+    Player.next_player_id += 1
 
     # Position
     self.LEFT_BUFFER = 3
@@ -91,10 +100,10 @@ class Player(pygame.sprite.Sprite):
       return
 
     # Break blocks
-    game_map[int(self.head_row)][self.LEFT_BUFFER + 3].break_block()
-    game_map[int(self.head_row + 1)][self.LEFT_BUFFER + 3].break_block()
-    game_map[int(self.head_row)][self.LEFT_BUFFER + 4].break_block()
-    game_map[int(self.head_row + 1)][self.LEFT_BUFFER + 4].break_block()
+    game_map[int(self.head_row)][self.LEFT_BUFFER + 3].break_block(self._id)
+    game_map[int(self.head_row + 1)][self.LEFT_BUFFER + 3].break_block(self._id)
+    game_map[int(self.head_row)][self.LEFT_BUFFER + 4].break_block(self._id)
+    game_map[int(self.head_row + 1)][self.LEFT_BUFFER + 4].break_block(self._id)
 
     # Starts attacking
     self.animating = Move.ATK
@@ -241,11 +250,11 @@ class Player(pygame.sprite.Sprite):
     row = int(self.head_row)
     if self.animating == Move.SLD:
       # Two wide
-      if grid[row][self.LEFT_BUFFER + 1].solid or grid[row][self.LEFT_BUFFER + 2].solid:
+      if grid[row][self.LEFT_BUFFER + 1].collide(self._id) or grid[row][self.LEFT_BUFFER + 2].collide(self._id):
         return True
     else:
       # One wide
-      if grid[row][self.LEFT_BUFFER + 1].solid or grid[row + 1][self.LEFT_BUFFER + 1].solid:
+      if grid[row][self.LEFT_BUFFER + 1].collide(self._id) or grid[row + 1][self.LEFT_BUFFER + 1].collide(self._id):
         return True 
     return False
       

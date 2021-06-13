@@ -4,12 +4,14 @@ import pygame
 from pygame import Rect
 
 SHIFT_SZ = 5
+
 # Block
 class Block(pygame.sprite.Sprite):
   def __init__(self, row, col, image_path=Tile.GRASS):
     self.row = row 
     self.col = col
 
+    # Used in single player
     self.solid = True 
     
     super(Block, self).__init__()
@@ -31,8 +33,12 @@ class Block(pygame.sprite.Sprite):
     self.rect = self.rect.move(-1 * SHIFT_SZ, 0)
   
   # Do nothing
-  def break_block(self):
+  def break_block(self, player_id, single_player=False):
     return 
+  
+  # Does not collide, by default 
+  def collide(self, player_id, single_player=False):
+    return False
   
   # Increase speed
   @staticmethod
@@ -63,7 +69,8 @@ class Air(Block):
   def __init__(self, row, col):
     self.row = row
     self.col = col
-    self.solid = False 
+
+    self.solid = False
 
   # Block Override: Decrease col
   def decrease_col(self):
@@ -82,24 +89,35 @@ class WallBlock(Block):
   def __init__(self, row, col, image_path=Tile.WALL):
     super().__init__(row, col, image_path)
     self.solid = True
+    
+    # Ids for players that have broken the block
+    self.broken = set() 
   
   # Breaks block
-  def break_block(self):
-    if not self.solid:
-      return self
-    self.solid = False 
+  def break_block(self, player_id, single_player=False):
+    self.broken.add(player_id)
+
+    if (single_player):
+      # Update solid 
+      self.solid = False
 
     # Set block to broken block - need a different sprite
+    # Note: Although the block may appear to be Air, if will still act as a solid for 
+    #       agents that have yet to break it 
     self.image = LOAD.load_image(Tile.AIR, False)
     self.image = pygame.transform.scale(self.image, (BLOCK_SZ, BLOCK_SZ))
 
   
   # Check for collision
-  def collide(self):
-    if (self.solid):
-      return True
-    else:
+  def collide(self, player_id, single_player=False):
+    if single_player: 
+      # Collide if solid, don't otherwise
+      return self.solid
+
+    # Collide if block has hot been broken by player_id
+    if player_id in self.broken:
       return False
+    return True
 
 # Hard block
 class HardBlock(Block):
@@ -107,6 +125,7 @@ class HardBlock(Block):
     super().__init__(row, col, image_path)
     self.solid = True
   
-  def collide(self):
+  def collide(self, player_id, single_player=False):
+    # Always collide
     return True
 

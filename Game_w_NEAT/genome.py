@@ -12,7 +12,8 @@ class Genome():
   next_id = 0
   c1 = 1.0
   c2 = 1.0
-  c3 = 0.4
+  # c3 = 0.4
+  c3 = 3.0 # For larger populations with room for more species
   c_threshold = 3.0
   '''
   in_nodes: Number of input nodes
@@ -227,9 +228,6 @@ class Genome():
     
     # Average weight distance
     W = Genome.average_weight_d(genome_1, genome_2)
-
-    if E != 0 or D != 0: # DEBUG
-      print("HERE") # DEBUG
 
     # Compatibility
     comp = (Genome.c1 * E) / N + (Genome.c2 * D) / N + (Genome.c3 * W)

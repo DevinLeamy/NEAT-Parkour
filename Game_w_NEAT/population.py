@@ -67,7 +67,6 @@ class Population():
     for species in self.species:
       if species.offspring_cnt(pop_size, self.species_average_sum) == 0:
         # No offspring
-        print("ERE") # DEBUG
         self.species.remove(species)
   
   # Prune week species
@@ -115,6 +114,11 @@ class Population():
     self.speciate()
     self.prune_species()
     print("Remaining species count: %d" % len(self.species))
+    
+    # DEBUG
+    for species in self.species:
+      print("Members: %d, Best Fitness: %d, Average Fitness: %d" % (len(species.members), species.best_fitness, species.average_fitness))
+
     self.update_best_agent()
   
     # Agents for next generation

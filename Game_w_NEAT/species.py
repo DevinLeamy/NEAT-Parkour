@@ -53,14 +53,14 @@ class Species():
     else:
       self.staleness += 1
     
-    # Fitness sharing 
-    for agent in self.members:
-      agent.update_adjusted_fitness(len(self.members))
+    # Fitness sharing || commented out to DEBUG
+    # for agent in self.members:
+    #   agent.update_adjusted_fitness(len(self.members))
       
     # Total sum of member fitnesses
     total_fitness = sum([agent.fitness for agent in self.members])
 
-    # Update adjusted/average fitness
+    # Update adjusted / average fitness
     self.average_fitness = total_fitness / len(self.members)
   
   # Determine if given agent is a member of the species
@@ -89,8 +89,8 @@ class Species():
   # Modify?: https://github.com/CodeReclaimers/neat-python/blob/c2b79c88667a1798bfe33c00dd8e251ef8be41fa/neat/reproduction.py
   def offspring_cnt(self, pop_size, pop_average_sum):
     assert pop_average_sum != 0
-    print(self.average_fitness / pop_average_sum, self.average_fitness, pop_size) # DEBUG
-    # * 2 is for testing
+    # print(self.average_fitness / pop_average_sum, self.average_fitness, pop_size) # DEBUG
+    # x2 because the weekest half of the population was removed
     return int(self.average_fitness / pop_average_sum * pop_size) * 2
 
   # Produce offspring
