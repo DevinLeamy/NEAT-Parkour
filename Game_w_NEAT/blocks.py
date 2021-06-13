@@ -3,10 +3,9 @@ from config import *
 import pygame
 from pygame import Rect
 
-SHIFT_SZ = 5
-
 # Block
 class Block(pygame.sprite.Sprite):
+  SHIFT_SZ = 5
   def __init__(self, row, col, image_path=Tile.GRASS):
     self.row = row 
     self.col = col
@@ -30,7 +29,7 @@ class Block(pygame.sprite.Sprite):
 
   # Shift block left 
   def shift(self):
-    self.rect = self.rect.move(-1 * SHIFT_SZ, 0)
+    self.rect = self.rect.move(-1 * Block.SHIFT_SZ, 0)
   
   # Do nothing
   def break_block(self, player_id, single_player=False):
@@ -43,13 +42,12 @@ class Block(pygame.sprite.Sprite):
   # Increase speed
   @staticmethod
   def increase_shift():
-    global SHIFT_SZ
-    SHIFT_SZ = min(15, SHIFT_SZ + 1)
+    Block.SHIFT_SZ = min(15, Block.SHIFT_SZ + 1)
 
     # SHIFT_SZ must be a divisor of BLOCK_SZ
-    while BLOCK_SZ % SHIFT_SZ != 0:
-      SHIFT_SZ += 1
-    assert BLOCK_SZ % SHIFT_SZ == 0
+    while BLOCK_SZ % Block.SHIFT_SZ != 0:
+      Block.SHIFT_SZ += 1
+    assert BLOCK_SZ % Block.SHIFT_SZ == 0
   
   # Returns block type Id 
   def get_block_type(self):
@@ -63,6 +61,12 @@ class Block(pygame.sprite.Sprite):
   # Get location of left side of block
   def get_block_start(self):
     return self.rect.left
+  
+  # Reset block shift size
+  @staticmethod
+  def reset_shift():
+    Block.SHIFT_SZ = 5
+
 
 # Air block
 class Air(Block):

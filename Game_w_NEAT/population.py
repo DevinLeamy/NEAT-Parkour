@@ -52,7 +52,7 @@ class Population():
     
     if (current_gen_best.fitness > self.best_agent.fitness):
       # Replace current best agent 
-      self.best_agent = Agent.clone(current_gen_best)
+      self.best_agent = Agent.clone(current_gen_best, copy_fitness=True)
   
   # Prune stale species
   def prune_stale_species(self):
@@ -163,4 +163,11 @@ class Population():
   def sort_species(self, decreasing=True):
     self.species.sort(key=lambda species : species.average_fitness, reverse=decreasing)
   
-
+  # Increase game speed
+  def increase_speed(self):
+    for agent in self.members:
+      agent.player.increase_speed()
+  
+  # Get fitness of best agent
+  def get_best_fitness(self):
+    return self.best_agent.fitness

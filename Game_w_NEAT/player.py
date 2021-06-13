@@ -1,4 +1,5 @@
 from config import *
+from blocks import Block 
 import pygame
 import random
 from enums import Move, Level, State
@@ -248,15 +249,16 @@ class Player(pygame.sprite.Sprite):
   # Check for obstacle collisions
   def colliding(self, grid):
     row = int(self.head_row)
+    # Next three blocks on the top and bottom
+    blocks = [
+      [grid[row][self.LEFT_BUFFER].collide(self._id), grid[row][self.LEFT_BUFFER + 1].collide(self._id), grid[row][self.LEFT_BUFFER + 2].collide(self._id)],
+      [grid[row + 1][self.LEFT_BUFFER].collide(self._id), grid[row + 1][self.LEFT_BUFFER + 1].collide(self._id), grid[row + 1][self.LEFT_BUFFER + 2].collide(self._id)]
+    ]
     if self.animating == Move.SLD:
       # Two wide
-      if grid[row][self.LEFT_BUFFER + 1].collide(self._id) or grid[row][self.LEFT_BUFFER + 2].collide(self._id):
-        return True
-    else:
-      # One wide
-      if grid[row][self.LEFT_BUFFER + 1].collide(self._id) or grid[row + 1][self.LEFT_BUFFER + 1].collide(self._id):
-        return True 
-    return False
+      return blocks[0][1] or blocks[0][2]
+    # One wide
+    return blocks[0][1] or blocks[1][1]
       
   # Update player state
   def update(self, grid):
@@ -287,6 +289,7 @@ class Player(pygame.sprite.Sprite):
       type2=grid[Level.GRND - 2][self.LEFT_BUFFER + 2].get_block_type(),
       type3=grid[Level.GRND - 3][self.LEFT_BUFFER + 2].get_block_type(),
       # Next block col
-      dist=grid[Level.GRND - 1][self.LEFT_BUFFER + 2].get_block_start()
-      # TODO: Add current score
+      dist=grid[Level.GRND - 1][self.LEFT_BUFFER + 2].get_block_start(),
+      # Block shift (distance travelled per update; used to set game speed) 
+      shift_sz=Block.SHIFT_SZ
     )

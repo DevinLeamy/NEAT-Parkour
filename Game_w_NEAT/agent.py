@@ -66,9 +66,11 @@ class Agent():
   
   # Copy of agent - only genome is copied, remaining values are defaults
   @staticmethod
-  def clone(agent):
+  def clone(agent, copy_fitness=False):
     genome = Genome.clone(agent.genome)
     clone = Agent(genome)
+    if copy_fitness:
+      clone.fitness = agent.fitness
     return clone
 
 

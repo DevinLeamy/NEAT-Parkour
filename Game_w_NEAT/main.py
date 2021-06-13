@@ -22,7 +22,7 @@ running = True
 from player import Player 
 from game_map import Map
 from population import Population
-
+from blocks import Block
 
 # Game  
 class Game:
@@ -47,23 +47,31 @@ class Game:
     self.updates = 0
     self.get_score = lambda : self.updates // 10 
 
-    # Score and generation display 
+    # Score, generation, and fitness display 
     self.score_str = lambda score: "Score: %d" % (score)
     self.generation_str = lambda generation: "Generation: %d" % (generation)
+    self.fitness_str = lambda fitness: "Best fitness: %d" % (fitness)
     self.font = pygame.font.SysFont("couriernewttf", 25)
 
-  # Update score 
-  def display_score_and_generation(self):
-    display_string = "%s   %s" % (self.score_str(self.get_score()), 
-                                  self.generation_str(self.population.generation))
-    # Create display  
-    display = self.font.render(display_string, True, Color.BLACK)
-    display_rect = display.get_rect()
-    display_rect.topleft = (0, 0)
+  # Display score, generation, and best-agent fitness  
+  def update_main_display(self):
+    # Display data
+    score = self.get_score()
+    generation = self.population.generation
+    best_fitness = self.population.get_best_fitness()
 
-    # Display
-    SCN.blit(display, display_rect)
-  
+    # Display strings
+    display_str = [self.score_str(score), self.generation_str(generation), self.fitness_str(best_fitness)]
+
+    # Create and display 
+    for idx, line in enumerate(display_str):
+      display = self.font.render(line, True, Color.BLACK)
+      display_rect = display.get_rect()
+      display_rect.topleft = (0, idx * 30)
+
+      # Display
+      SCN.blit(display, display_rect)
+
   # Updates all game sprites
   def update(self):
     # Increment updates 
@@ -73,12 +81,12 @@ class Game:
     self.population.update(self.game_map.grid, self.get_score())
     self.game_map.update()
 
-    self.display_score_and_generation() 
+    self.update_main_display() 
 
-    # Increase speed (Currently off to make the game easier)
-    # if self.updates % 750 == 0:
-    #   self.PK.increase_speed()
-    #   self.game_map.ask_increase = True
+    # Increase speed 
+    if self.updates % 500 == 0:
+      self.population.increase_speed()
+      self.game_map.ask_increase = True
 
     self.draw()
 
@@ -91,6 +99,7 @@ class Game:
     self.updates = 0
     self.game_map = Map()
     self.sprites = pygame.sprite.Group()
+    Block.reset_shift()
 
     # Update population 
     self.population.natural_selection()

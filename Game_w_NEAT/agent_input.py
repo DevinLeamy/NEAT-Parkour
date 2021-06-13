@@ -7,14 +7,18 @@ class Input():
     type2: Type of next block @ groud-height + 2 
     type3: Type of next block @ groud-height + 1
     dist: Distance to the next block
+    shift_sz: Distance a block travels per update 
   '''
-  def __init__(self, height, sliding, type1, type2, type3, dist): 
-    self.height = height
-    self.sliding = sliding
-    self.type1 = type1
-    self.type2 = type2
-    self.type3 = type3
-    self.dist = dist
+  def __init__(self, height, sliding, type1, type2, type3, dist, shift_sz,
+                     max_height=40, max_sliding=1, max_type=4, max_dist=10, max_shift_sz=10): 
+    self.height = height / max_height
+    self.sliding = sliding / max_sliding
+    self.type1 = type1 / max_type
+    self.type2 = type2 / max_type 
+    self.type3 = type3 / max_type
+    self.dist = dist / max_dist
+    self.shift_sz = shift_sz / max_shift_sz
+
 
   # Return input as array
   def as_array(self):
@@ -24,6 +28,7 @@ class Input():
       self.type1,
       self.type2,
       self.type3,
-      self.dist
+      self.dist,
+      self.shift_sz
     ]
   
