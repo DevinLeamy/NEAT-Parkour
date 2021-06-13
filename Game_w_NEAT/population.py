@@ -69,10 +69,18 @@ class Population():
         # No offspring
         self.species.remove(species)
   
+  # Prune empty species
+  def prune_dead_species(self):
+    for species in self.species:
+      if len(species.members) == 0:
+        # Species is dead
+        self.species.remove(species)
+  
   # Prune week species
   def prune_species(self):
     self.prune_low_preforming_species() 
     self.prune_stale_species()
+    self.prune_dead_species()
     # Average sum may have changed
     self.update_species_averages_sum()
   
@@ -100,7 +108,7 @@ class Population():
       if len(species.members) == 0:
         self.species.remove(species)
         continue
-      print("Species members: %d" % (len(species.members)))
+
       species.cut_half()
       species.update_fitness()
 
@@ -113,8 +121,8 @@ class Population():
   def natural_selection(self):
     self.speciate()
     self.prune_species()
-    print("Remaining species count: %d" % len(self.species))
-    
+
+    print("Remaining species: %d" % len(self.species))
     # DEBUG
     for species in self.species:
       print("Members: %d, Best Fitness: %d, Average Fitness: %d" % (len(species.members), species.best_fitness, species.average_fitness))

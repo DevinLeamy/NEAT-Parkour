@@ -3,7 +3,7 @@ import random
 from enums import Level, Tile, Ob
 from config import *
 
-random.seed(420)
+random.seed(SEED)
 
 # Map
 class Map:

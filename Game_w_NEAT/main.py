@@ -1,9 +1,8 @@
 # Teaching Parkour... The Darwin Way
-import random
-random.seed(420)
-
 import pygame 
 from config import *
+import random
+random.seed(SEED)
 
 pygame.init()
 
