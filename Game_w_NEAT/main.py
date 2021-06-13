@@ -1,18 +1,15 @@
 # Teaching Parkour... The Darwin Way
 import pygame 
 from config import *
-import random
-random.seed(SEED)
 
 pygame.init()
-
 pygame.display.init()
 
 # Constants
 SCN = pygame.display.set_mode((W, H))
 
 from enums import Color, Move, Ob, State
-# from game import Game
+
 # Pygame init
 pygame.display.flip()
 pygame.display.set_caption("Teaching Parkour... The Darwin Way")
@@ -51,23 +48,45 @@ class Game:
     self.score_str = lambda score: "Score: %d" % (score)
     self.generation_str = lambda generation: "Generation: %d" % (generation)
     self.fitness_str = lambda fitness: "Best fitness: %d" % (fitness)
-    self.font = pygame.font.SysFont("couriernewttf", 25)
+    self.population_str = lambda population: "Population size: %d" % (population)
+    self.font = pygame.font.SysFont("couriernewttf", 20)
 
-  # Display score, generation, and best-agent fitness  
+  # Display score, generation, population size, and best-agent fitness  
   def update_main_display(self):
     # Display data
     score = self.get_score()
     generation = self.population.generation
     best_fitness = self.population.get_best_fitness()
+    population_sz = self.population.get_population_size()
 
     # Display strings
-    display_str = [self.score_str(score), self.generation_str(generation), self.fitness_str(best_fitness)]
+    display_str = [self.score_str(score), self.generation_str(generation), self.population_str(population_sz), self.fitness_str(best_fitness)]
 
     # Create and display 
+    OFFSET = 10 # Left and top margin
     for idx, line in enumerate(display_str):
       display = self.font.render(line, True, Color.BLACK)
       display_rect = display.get_rect()
-      display_rect.topleft = (0, idx * 30)
+      display_rect.topleft = (OFFSET, OFFSET + idx * 30)
+
+      # Display
+      SCN.blit(display, display_rect)
+  
+  # Display species information
+  def update_species_display(self):
+    OFFSET_LEFT = 10
+    OFFSET_TOP = 600 
+
+    # Display strings
+    display_str = ["Species (%d):" % (len(self.population.species))]
+    for species in self.population.species:
+      line = "- Members: %d, Best fitness: %d, Average fitness: %d" % (len(species.members), species.best_fitness, species.average_fitness) 
+      display_str.append(line)
+
+    for idx, line in enumerate(display_str):
+      display = self.font.render(line, True, Color.BLACK)
+      display_rect = display.get_rect()
+      display_rect.topleft = (OFFSET_LEFT, OFFSET_TOP + idx * 30) 
 
       # Display
       SCN.blit(display, display_rect)
@@ -81,14 +100,16 @@ class Game:
     self.population.update(self.game_map.grid, self.get_score())
     self.game_map.update()
 
-    self.update_main_display() 
-
     # Increase speed 
     if self.updates % 500 == 0:
       self.population.increase_speed()
       self.game_map.ask_increase = True
 
     self.draw()
+
+    # Update displays
+    self.update_main_display() 
+    self.update_species_display()
 
     # Update game status, game continues so long as the population has active members
     self.done = not self.population.has_active()

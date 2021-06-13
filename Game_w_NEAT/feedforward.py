@@ -27,7 +27,7 @@ class Feedforward():
         node.activate()
     
     # Determine output (decision)
-    out_nodes = self.layers[-1]
+    out_nodes = [node for node in self.nodes if node.is_output()]
 
     # Find idx of output node with max value
     decision = 0
@@ -100,7 +100,8 @@ class Feedforward():
     layer = [node for node in self.nodes if node.is_input()]
     self.layers.append(layer)
     
-    seen = set() # For debugging
+    # Set of node _ids that have been visited
+    seen = set() 
     # BFS
     while (len(layer) != 0):
       new_layer = []
@@ -110,12 +111,16 @@ class Feedforward():
             continue
           new_node = edge.out_node
           # Avoid duplicates
-          if not new_node in new_layer and not new_node._id in seen: # For debugging
+          if not new_node in new_layer and not new_node._id in seen: 
             new_layer.append(new_node)
-            seen.add(new_node._id) # For debugging
+            # Node has been seen
+            seen.add(new_node._id) 
       if len(new_layer) != 0:
         self.layers.append(new_layer)
       layer = new_layer
+    # if len(self.layers) > 2:
+    #   for idx, layer in enumerate(self.layers):
+    #     print("Layer %d:" % (idx), len(layer))
     # print("Layers: ", len(self.layers))
 
 

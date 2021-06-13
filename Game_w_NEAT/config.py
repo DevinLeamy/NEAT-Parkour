@@ -7,8 +7,8 @@ BLOCKS = 18 # Number of blocks shown at once
 BLOCK_SZ = int(W / BLOCKS) # Blocks width and height in pixels
 DELAY = 30 # Millisecond delay between frames
 GENERATIONS = 100 # Number of generation
-POPULATION = 150 # Size of the population
-SEED = 101 # Seem for random - to make training repeatable
+POPULATION = 200 # Size of the population
+SEED = 103 # Seem for random - to make training repeatable
  
 OBSTACLES = [Ob.WALL, Ob.THARD, Ob.BHARD]
 

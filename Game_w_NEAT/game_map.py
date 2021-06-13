@@ -3,11 +3,13 @@ import random
 from enums import Level, Tile, Ob
 from config import *
 
-random.seed(SEED)
 
 # Map
 class Map:
   def __init__(self):
+    # Reseed random - makes the map predictable
+    random.seed(SEED)
+
     # Set buffer
     self.BUFFER = 5
     self.BUFFER_SZ = self.BUFFER * BLOCK_SZ

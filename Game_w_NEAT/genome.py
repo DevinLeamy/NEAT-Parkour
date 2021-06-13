@@ -19,7 +19,7 @@ class Genome():
   in_nodes: Number of input nodes
   out_nodes: Number of output nodes
   '''
-  def __init__(self, in_nodes_cnt=7, out_nodes_cnt=6, initialize_nodes=True):
+  def __init__(self, in_nodes_cnt=10, out_nodes_cnt=6, initialize_nodes=True):
     self.in_nodes_cnt = in_nodes_cnt
     self.out_nodes_cnt = out_nodes_cnt
 
