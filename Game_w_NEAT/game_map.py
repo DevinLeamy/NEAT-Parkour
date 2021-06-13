@@ -1,13 +1,15 @@
-from blocks import Block, HardBlock, WallBlock, Air, SHIFT_SZ
+from blocks import Block, HardBlock, WallBlock, Air
 import random
 from enums import Level, Tile, Ob
 from config import *
 
-random.seed(420)
 
 # Map
 class Map:
   def __init__(self):
+    # Reseed random - makes the map predictable
+    random.seed(SEED)
+
     # Set buffer
     self.BUFFER = 5
     self.BUFFER_SZ = self.BUFFER * BLOCK_SZ
@@ -51,9 +53,8 @@ class Map:
   # Update blocks
   def update(self):
     # SHIFT_SZ might have changed
-    from blocks import SHIFT_SZ
-    self.current_buffer -= SHIFT_SZ
-    self.total_shift += SHIFT_SZ
+    self.current_buffer -= Block.SHIFT_SZ
+    self.total_shift += Block.SHIFT_SZ
     for i in range(self.rows):
       for j in range(len(self.grid[i])):
         self.grid[i][j].shift()

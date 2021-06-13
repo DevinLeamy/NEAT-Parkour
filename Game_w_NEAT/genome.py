@@ -12,13 +12,14 @@ class Genome():
   next_id = 0
   c1 = 1.0
   c2 = 1.0
-  c3 = 0.4
+  # c3 = 0.4
+  c3 = 3.0 # For larger populations with room for more species
   c_threshold = 3.0
   '''
   in_nodes: Number of input nodes
   out_nodes: Number of output nodes
   '''
-  def __init__(self, in_nodes_cnt=6, out_nodes_cnt=6, initialize_nodes=True):
+  def __init__(self, in_nodes_cnt=10, out_nodes_cnt=6, initialize_nodes=True):
     self.in_nodes_cnt = in_nodes_cnt
     self.out_nodes_cnt = out_nodes_cnt
 
@@ -130,8 +131,6 @@ class Genome():
 
   # Add connection gene (edge) to genome
   def add_connection(self):
-    # print("Adding connection")
-
     # Create NN 
     feedforward = Feedforward(self.nodes)
     if feedforward.fully_connected():
@@ -143,9 +142,7 @@ class Genome():
     new_edge = Edge(in_node, out_node) 
 
     # Add edge to nodes and genome
-    print(len(edges)) # DEBUG
     self.edges.append(new_edge)
-    print(len(edges)) # DEBUG
 
     start_node.add_edge(new_edge)
     end_node.add_edge(new_edge)
@@ -171,7 +168,6 @@ class Genome():
     rand = random.uniform(0, 1)
     if rand < 0.05:
       self.add_connection()
-      # print(len(self.edges)) # DEBUG
     
     # Add node
     rand = random.uniform(0, 1)
@@ -184,15 +180,6 @@ class Genome():
     edges_1 = genome_1.edges
     edges_2 = genome_2.edges
 
-    # edge_1_inf = [Edge.data(edge)[:2] for edge in edges_1] # DEBUG
-    # edge_2_inf = [Edge.data(edge)[:2] for edge in edges_2] # DEBUG
-
-    # print(edge_1_inf) # DEBUG
-
-    # print(edge_2_inf) # DEBUG 
-
-    # print(len(edges_1), len(edges_2)) # DEBUG
-
     # Max innovation numbers 
     max_1 = genome_1.max_inv()
     max_2 = genome_2.max_inv()
@@ -202,8 +189,6 @@ class Genome():
     if N <= 20:
       N = 1
     
-    # N = 1 # DEBUG
-
     # Number of excess and disjoint genes between parents
     E = 0
     D = 0
@@ -228,12 +213,9 @@ class Genome():
     # Average weight distance
     W = Genome.average_weight_d(genome_1, genome_2)
 
-    if E != 0 or D != 0: # DEBUG
-      print("HERE") # DEBUG
-
     # Compatibility
     comp = (Genome.c1 * E) / N + (Genome.c2 * D) / N + (Genome.c3 * W)
-    print("E: %f, D: %f, W: %f, Compatibility: %f" % (E, D, W, comp))
+    # print("E: %f, D: %f, W: %f, Compatibility: %f" % (E, D, W, comp))
     return comp
 
   # Set edges - for clarity

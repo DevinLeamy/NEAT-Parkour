@@ -1,22 +1,32 @@
 from config import *
+from blocks import Block 
 import pygame
 import random
-from enums import Move, Level, State
+from enums import Move, Level, State, Tile
 from agent_input import Input 
 
 # Player 
 class Player(pygame.sprite.Sprite):
+  # _id of the next player to be created
+  next_player_id = 0
+
   def __init__(self):
     super(Player, self).__init__()
     # Status
     self.alive = True
+
+    # Set _id
+    self._id = Player.next_player_id
+
+    # Update next id counter
+    Player.next_player_id += 1
 
     # Position
     self.LEFT_BUFFER = 3
     self.head_row = Level.GRND - 2 # Two blocks above ground level
         
     # Id: (frame-count, updates-per-frame)
-    self.attacks = {1: [5, 4], 2: [6, 4], 3: [6, 4]}
+    self.attacks = {1: [5, 3], 2: [6, 3], 3: [6, 3]}
     self.jumps = {1: [4, 2]}    
     self.falls = {1: [4, 2]}
     self.runs = {1: [6, 4]}
@@ -91,10 +101,8 @@ class Player(pygame.sprite.Sprite):
       return
 
     # Break blocks
-    game_map[int(self.head_row)][self.LEFT_BUFFER + 3].break_block()
-    game_map[int(self.head_row + 1)][self.LEFT_BUFFER + 3].break_block()
-    game_map[int(self.head_row)][self.LEFT_BUFFER + 4].break_block()
-    game_map[int(self.head_row + 1)][self.LEFT_BUFFER + 4].break_block()
+    game_map[int(self.head_row)][self.LEFT_BUFFER + 2].break_block(self._id)
+    game_map[int(self.head_row + 1)][self.LEFT_BUFFER + 2].break_block(self._id)
 
     # Starts attacking
     self.animating = Move.ATK
@@ -225,29 +233,31 @@ class Player(pygame.sprite.Sprite):
   # Check if player on ground
   def on_ground(self, grid):
     row = int(self.head_row)
+    # Surrounding ground blocks
+    blocks = [
+      [grid[row + 1][self.LEFT_BUFFER], grid[row + 1][self.LEFT_BUFFER + 1]],
+      [grid[row + 2][self.LEFT_BUFFER + 1], grid[row + 2][self.LEFT_BUFFER + 2]]
+    ]
     if self.animating == Move.SLD:
-      # One tall 
-      if grid[row + 1][self.LEFT_BUFFER].solid or grid[row + 1][self.LEFT_BUFFER + 1].solid:
-        return True
-    else:
-      # Two tall 
-      if grid[row + 2][self.LEFT_BUFFER + 1].solid or grid[row + 2][self.LEFT_BUFFER + 2].solid:
+      # One tall || cannot stand on wall blocks
+      return (blocks[0][0].solid and not blocks[0][0].get_block_type() == Tile.WALL_ID) or (blocks[0][1].solid and not blocks[0][1].get_block_type() == Tile.WALL_ID) 
 
-        return True
-    return False
+    # Two tall || cannot stand on wall blocks
+    return (blocks[1][0].solid and not blocks[1][0].get_block_type() == Tile.WALL_ID) or (blocks[1][1].solid and not blocks[1][1].get_block_type() == Tile.WALL_ID) 
 
   # Check for obstacle collisions
   def colliding(self, grid):
     row = int(self.head_row)
+    # Next three blocks on the top and bottom
+    blocks = [
+      [grid[row][self.LEFT_BUFFER].collide(self._id), grid[row][self.LEFT_BUFFER + 1].collide(self._id), grid[row][self.LEFT_BUFFER + 2].collide(self._id)],
+      [grid[row + 1][self.LEFT_BUFFER].collide(self._id), grid[row + 1][self.LEFT_BUFFER + 1].collide(self._id), grid[row + 1][self.LEFT_BUFFER + 2].collide(self._id)]
+    ]
     if self.animating == Move.SLD:
       # Two wide
-      if grid[row][self.LEFT_BUFFER + 1].solid or grid[row][self.LEFT_BUFFER + 2].solid:
-        return True
-    else:
-      # One wide
-      if grid[row][self.LEFT_BUFFER + 1].solid or grid[row + 1][self.LEFT_BUFFER + 1].solid:
-        return True 
-    return False
+      return blocks[0][1] or blocks[0][2]
+    # One wide
+    return blocks[0][1] or blocks[1][1]
       
   # Update player state
   def update(self, grid):
@@ -274,10 +284,14 @@ class Player(pygame.sprite.Sprite):
       # Might be able to use the raw assignment
       sliding=1 if self.animating == Move.RUN else 0,
       # Block type of upcoming blocks
-      type1=grid[Level.GRND - 1][self.LEFT_BUFFER + 2].get_block_type(),
-      type2=grid[Level.GRND - 2][self.LEFT_BUFFER + 2].get_block_type(),
-      type3=grid[Level.GRND - 3][self.LEFT_BUFFER + 2].get_block_type(),
+      type1=grid[Level.GRND - 1][self.LEFT_BUFFER + 1].get_block_type(),
+      type2=grid[Level.GRND - 2][self.LEFT_BUFFER + 1].get_block_type(),
+      type3=grid[Level.GRND - 3][self.LEFT_BUFFER + 1].get_block_type(),
+      type4=grid[Level.GRND - 1][self.LEFT_BUFFER + 2].get_block_type(),
+      type5=grid[Level.GRND - 2][self.LEFT_BUFFER + 2].get_block_type(),
+      type6=grid[Level.GRND - 3][self.LEFT_BUFFER + 2].get_block_type(),
       # Next block col
-      dist=grid[Level.GRND - 1][self.LEFT_BUFFER + 2].get_block_start()
-      # TODO: Add current score
+      dist=grid[Level.GRND - 1][self.LEFT_BUFFER + 2].get_block_start(),
+      # Block shift (distance travelled per update; used to set game speed) 
+      shift_sz=Block.SHIFT_SZ
     )

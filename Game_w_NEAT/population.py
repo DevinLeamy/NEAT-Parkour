@@ -52,7 +52,7 @@ class Population():
     
     if (current_gen_best.fitness > self.best_agent.fitness):
       # Replace current best agent 
-      self.best_agent = Agent.clone(current_gen_best)
+      self.best_agent = Agent.clone(current_gen_best, copy_fitness=True)
   
   # Prune stale species
   def prune_stale_species(self):
@@ -67,13 +67,20 @@ class Population():
     for species in self.species:
       if species.offspring_cnt(pop_size, self.species_average_sum) == 0:
         # No offspring
-        print("ERE") # DEBUG
+        self.species.remove(species)
+  
+  # Prune empty species
+  def prune_dead_species(self):
+    for species in self.species:
+      if len(species.members) == 0:
+        # Species is dead
         self.species.remove(species)
   
   # Prune week species
   def prune_species(self):
     self.prune_low_preforming_species() 
     self.prune_stale_species()
+    self.prune_dead_species()
     # Average sum may have changed
     self.update_species_averages_sum()
   
@@ -101,7 +108,7 @@ class Population():
       if len(species.members) == 0:
         self.species.remove(species)
         continue
-      print("Species members: %d" % (len(species.members)))
+
       species.cut_half()
       species.update_fitness()
 
@@ -114,7 +121,13 @@ class Population():
   def natural_selection(self):
     self.speciate()
     self.prune_species()
-    print("Remaining species count: %d" % len(self.species))
+
+    print("Remaining species: %d" % len(self.species))
+    for species in self.species:
+      print("Members: %d, Best Fitness: %d, Average Fitness: %d" % (len(species.members), 
+                                                                    species.best_fitness, 
+                                                                    species.average_fitness))
+
     self.update_best_agent()
   
     # Agents for next generation
@@ -133,6 +146,9 @@ class Population():
     print("Number of offspring: %d" % len(offspring))
     self.members = offspring
 
+    # Update generation
+    self.generation += 1
+
   # Update species averages sum
   def update_species_averages_sum(self):
     self.species_average_sum = sum([species.average_fitness for species in self.species])
@@ -147,4 +163,11 @@ class Population():
   def sort_species(self, decreasing=True):
     self.species.sort(key=lambda species : species.average_fitness, reverse=decreasing)
   
-
+  # Increase game speed
+  def increase_speed(self):
+    for agent in self.members:
+      agent.player.increase_speed()
+  
+  # Get fitness of best agent
+  def get_best_fitness(self):
+    return self.best_agent.fitness
