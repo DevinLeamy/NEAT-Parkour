@@ -47,17 +47,22 @@ class Game:
     self.updates = 0
     self.get_score = lambda : self.updates // 10 
 
-    # Score display
-    self.get_score_string = lambda score: "Score: %d" % (score)
-    self.score_font = pygame.font.SysFont("couriernewttf", 25)
+    # Score and generation display 
+    self.score_str = lambda score: "Score: %d" % (score)
+    self.generation_str = lambda generation: "Generation: %d" % (generation)
+    self.font = pygame.font.SysFont("couriernewttf", 25)
 
   # Update score 
-  def display_score(self):
+  def display_score_and_generation(self):
+    display_string = "%s   %s" % (self.score_str(self.get_score()), 
+                                  self.generation_str(self.population.generation))
+    # Create display  
+    display = self.font.render(display_string, True, Color.BLACK)
+    display_rect = display.get_rect()
+    display_rect.topleft = (0, 0)
+
     # Display
-    score_display = self.score_font.render(self.get_score_string(self.get_score()), True, Color.BLACK)
-    score_rect = score_display.get_rect()
-    score_rect.topleft = (0, 0)
-    SCN.blit(score_display, score_rect)
+    SCN.blit(display, display_rect)
   
   # Updates all game sprites
   def update(self):
@@ -68,7 +73,7 @@ class Game:
     self.population.update(self.game_map.grid, self.get_score())
     self.game_map.update()
 
-    self.display_score() 
+    self.display_score_and_generation() 
 
     # Increase speed (Currently off to make the game easier)
     # if self.updates % 750 == 0:
@@ -120,7 +125,6 @@ state = State.RUNNING
 
 # 100 = number of generations
 for gen in range(GENERATIONS):
-  print("Generation: %d" % gen)
   # Game loop
   while True:
     for event in pygame.event.get():

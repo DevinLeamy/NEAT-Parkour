@@ -123,9 +123,10 @@ class Population():
     self.prune_species()
 
     print("Remaining species: %d" % len(self.species))
-    # DEBUG
     for species in self.species:
-      print("Members: %d, Best Fitness: %d, Average Fitness: %d" % (len(species.members), species.best_fitness, species.average_fitness))
+      print("Members: %d, Best Fitness: %d, Average Fitness: %d" % (len(species.members), 
+                                                                    species.best_fitness, 
+                                                                    species.average_fitness))
 
     self.update_best_agent()
   
@@ -144,6 +145,9 @@ class Population():
     # Replace population with offspring
     print("Number of offspring: %d" % len(offspring))
     self.members = offspring
+
+    # Update generation
+    self.generation += 1
 
   # Update species averages sum
   def update_species_averages_sum(self):
