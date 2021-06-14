@@ -5,7 +5,7 @@ import math
 # Controller of all members of the population
 class Population():
   # Max number of agents in a training batch
-  BATCH_SZ = 120
+  BATCH_SZ = 150
   '''
   size: Initial population size
   generation: Generation the population was created

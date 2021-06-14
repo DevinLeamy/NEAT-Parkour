@@ -51,7 +51,7 @@ class Game:
     self.batch_str = lambda batch, batches: "Batch: %d of %d" % (batch, batches)
 
     # Font
-    self.font = pygame.font.SysFont("couriernewttf", 20)
+    self.font = pygame.font.SysFont("couriernewttf", 17)
 
     # Display batch numbers
     self.update_batch_display()
