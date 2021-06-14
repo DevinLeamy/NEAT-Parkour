@@ -240,10 +240,12 @@ class Player(pygame.sprite.Sprite):
     ]
     if self.animating == Move.SLD:
       # One tall || cannot stand on wall blocks
-      return (blocks[0][0].solid and not blocks[0][0].get_block_type() == Tile.WALL_ID) or (blocks[0][1].solid and not blocks[0][1].get_block_type() == Tile.WALL_ID) 
+      # return (blocks[0][0].solid and not blocks[0][0].get_block_type() == Tile.WALL_ID) or (blocks[0][1].solid and not blocks[0][1].get_block_type() == Tile.WALL_ID) 
+      return blocks[0][0].solid or blocks[0][1].solid
 
     # Two tall || cannot stand on wall blocks
-    return (blocks[1][0].solid and not blocks[1][0].get_block_type() == Tile.WALL_ID) or (blocks[1][1].solid and not blocks[1][1].get_block_type() == Tile.WALL_ID) 
+    # return (blocks[1][0].solid and not blocks[1][0].get_block_type() == Tile.WALL_ID) or (blocks[1][1].solid and not blocks[1][1].get_block_type() == Tile.WALL_ID) 
+    return blocks[1][0].solid or blocks[1][1].solid
 
   # Check for obstacle collisions
   def colliding(self, grid):

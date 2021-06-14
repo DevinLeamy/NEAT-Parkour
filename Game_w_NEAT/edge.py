@@ -44,7 +44,8 @@ class Edge():
   
   # Squeeze input between a range
   def clamp(self, x):
-    return min(max(-1.0, x), 1.0)
+    return x # DEBUG
+    # return min(max(-1.0, x), 1.0)
 
   # Disable edge
   def disable(self):
