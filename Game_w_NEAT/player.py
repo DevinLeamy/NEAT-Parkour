@@ -286,10 +286,8 @@ class Player(pygame.sprite.Sprite):
       # Block type of upcoming blocks
       type1=grid[Level.GRND - 1][self.LEFT_BUFFER + 1].get_block_type(),
       type2=grid[Level.GRND - 2][self.LEFT_BUFFER + 1].get_block_type(),
-      type3=grid[Level.GRND - 3][self.LEFT_BUFFER + 1].get_block_type(),
-      type4=grid[Level.GRND - 1][self.LEFT_BUFFER + 2].get_block_type(),
-      type5=grid[Level.GRND - 2][self.LEFT_BUFFER + 2].get_block_type(),
-      type6=grid[Level.GRND - 3][self.LEFT_BUFFER + 2].get_block_type(),
+      type3=grid[Level.GRND - 1][self.LEFT_BUFFER + 2].get_block_type(),
+      type4=grid[Level.GRND - 2][self.LEFT_BUFFER + 2].get_block_type(),
       # Next block col
       dist=grid[Level.GRND - 1][self.LEFT_BUFFER + 2].get_block_start(),
       # Block shift (distance travelled per update; used to set game speed) 

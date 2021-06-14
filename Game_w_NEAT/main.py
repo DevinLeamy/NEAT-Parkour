@@ -32,9 +32,8 @@ class Game:
 
     self.population = Population(size=POPULATION) 
 
-    # Add players to sprite group
-    for agent in self.population.members:
-      # Note: Agent is the NEAT class that wraps Player, the sprite that plays the game
+    # Add batch to sprite group 
+    for agent in self.population.get_batch():
       self.sprites.add(agent.player)
 
     # Create map and add block sprites
@@ -44,12 +43,18 @@ class Game:
     self.updates = 0
     self.get_score = lambda : self.updates // 10 
 
-    # Score, generation, and fitness display 
+    # Display strings 
     self.score_str = lambda score: "Score: %d" % (score)
     self.generation_str = lambda generation: "Generation: %d" % (generation)
     self.fitness_str = lambda fitness: "Best fitness: %d" % (fitness)
     self.population_str = lambda population: "Population size: %d" % (population)
+    self.batch_str = lambda batch, batches: "Batch: %d of %d" % (batch, batches)
+
+    # Font
     self.font = pygame.font.SysFont("couriernewttf", 20)
+
+    # Display batch numbers
+    self.update_batch_display()
 
   # Display score, generation, population size, and best-agent fitness  
   def update_main_display(self):
@@ -72,10 +77,30 @@ class Game:
       # Display
       SCN.blit(display, display_rect)
   
+  # Display batch number
+  def update_batch_display(self):
+    # +1 because batch numbers of 0 indexed
+    batch = self.population.current_batch + 1
+    batches = len(self.population.batches)
+
+    # Display string
+    batch_str = self.batch_str(batch, batches)
+
+    OFFSET_TOP = 10
+    OFFSET_LEFT = 900
+
+    # Create display
+    batch_display = self.font.render(batch_str, True, Color.BLACK)
+    batch_rect = batch_display.get_rect()
+    batch_rect.topleft = (OFFSET_LEFT, OFFSET_TOP)
+
+    # Display
+    SCN.blit(batch_display, batch_rect)
+
   # Display species information
   def update_species_display(self):
     OFFSET_LEFT = 10
-    OFFSET_TOP = 600 
+    OFFSET_TOP = 525
 
     # Display strings
     display_str = ["Species (%d):" % (len(self.population.species))]
@@ -110,6 +135,7 @@ class Game:
     # Update displays
     self.update_main_display() 
     self.update_species_display()
+    self.update_batch_display()
 
     # Update game status, game continues so long as the population has active members
     self.done = not self.population.has_active()
@@ -126,8 +152,23 @@ class Game:
     self.population.natural_selection()
 
     # Add players to sprite group
-    for agent in self.population.members:
+    for agent in self.population.get_batch():
       # Note: Agent is the NEAT class that wraps Player, the sprite that plays the game
+      self.sprites.add(agent.player)
+  
+  # Reset of the next batch
+  def next_batch(self):
+    self.population.update_batch()
+
+    # Set defaults
+    self.done = False
+    self.updates = 0
+    self.game_map = Map()
+    self.sprites = pygame.sprite.Group()
+    Block.reset_shift()
+
+    # Add batch to sprite group 
+    for agent in self.population.get_batch():
       self.sprites.add(agent.player)
 
   # Draw game state
@@ -155,22 +196,24 @@ state = State.RUNNING
 
 # 100 = number of generations
 for gen in range(GENERATIONS):
-  # Game loop
-  while True:
-    for event in pygame.event.get():
-      if event.type == pygame.QUIT:
-        running = False
-    
-    # Displaying
-    SCN.blit(LOAD.load_image("Tiles/Background.png"), (0, 0))
-    game.update() 
-    if game.done:
-      # Game Over
-      break
-    pygame.display.update()
+  for batch in range(len(game.population.batches)):
+    # Game loop
+    while True:
+      for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+          running = False
+      
+      # Displaying
+      SCN.blit(LOAD.load_image("Tiles/Background.png"), (0, 0))
+      game.update() 
+      if game.done:
+        # Game Over
+        break
+      pygame.display.update()
 
-    # Set speed
-    CLK.tick(DELAY)
+      # Set speed
+      CLK.tick(DELAY)
+    game.next_batch()
   game.next_generation()
 
 pygame.display.quit()

@@ -19,7 +19,7 @@ class Genome():
   in_nodes: Number of input nodes
   out_nodes: Number of output nodes
   '''
-  def __init__(self, in_nodes_cnt=10, out_nodes_cnt=6, initialize_nodes=True):
+  def __init__(self, in_nodes_cnt=8, out_nodes_cnt=6, initialize_nodes=True):
     self.in_nodes_cnt = in_nodes_cnt
     self.out_nodes_cnt = out_nodes_cnt
 
@@ -153,7 +153,7 @@ class Genome():
   def mutate(self):
     '''
     - 80% chance weights are mutated 
-    - 5%  chance connection is added
+    - 5%  chance connection is added - 30% for large populations
     - 3%  chance node is added
     '''
 
@@ -166,7 +166,7 @@ class Genome():
     
     # Add connection
     rand = random.uniform(0, 1)
-    if rand < 0.05:
+    if rand < 0.30:
       self.add_connection()
     
     # Add node
