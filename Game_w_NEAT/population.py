@@ -1,20 +1,28 @@
 from agent import Agent
 from species import Species
+import math
 
 # Controller of all members of the population
 class Population():
+  # Max number of agents in a training batch
+  BATCH_SZ = 150
   '''
   size: Initial population size
   generation: Generation the population was created
   '''
-  def __init__(self, size=150, generation=0):
+  def __init__(self, size=150):
     self.size = size
-    self.generation = generation
+    self.generation = 0 
     
     # Initialize population members
     self.members = []
     for i in range(self.size):
       self.members.append(Agent())
+    
+    # Initialize batches
+    self.batches = []
+    self.current_batch = 0
+    self.batch()
     
     # Initialize species
     self.species = []
@@ -25,14 +33,14 @@ class Population():
     # Sum of all species average fitnesses
     self.species_average_sum = 0  
   
-  # Update the population (calls game update loop)
+  # Update the players in the current batch
   def update(self, game_grid, score):
-    for agent in self.members:
+    for agent in self.get_batch():
       agent.update(game_grid, score)
   
-  # Determine if population has active members
+  # Determine if current batch has active members
   def has_active(self):
-    for agent in self.members:
+    for agent in self.get_batch():
       if agent.player.alive:
         return True 
     # All members of the population are inactive 
@@ -121,13 +129,6 @@ class Population():
   def natural_selection(self):
     self.speciate()
     self.prune_species()
-
-    print("Remaining species: %d" % len(self.species))
-    for species in self.species:
-      print("Members: %d, Best Fitness: %d, Average Fitness: %d" % (len(species.members), 
-                                                                    species.best_fitness, 
-                                                                    species.average_fitness))
-
     self.update_best_agent()
   
     # Agents for next generation
@@ -146,6 +147,9 @@ class Population():
     print("Number of offspring: %d" % len(offspring))
     self.members = offspring
 
+    # Group members into training batches
+    self.batch() 
+
     # Update generation
     self.generation += 1
 
@@ -163,11 +167,34 @@ class Population():
   def sort_species(self, decreasing=True):
     self.species.sort(key=lambda species : species.average_fitness, reverse=decreasing)
   
-  # Increase game speed
+  # Increase game speed for batch
   def increase_speed(self):
-    for agent in self.members:
+    for agent in self.get_batch():
       agent.player.increase_speed()
   
   # Get fitness of best agent
   def get_best_fitness(self):
     return self.best_agent.fitness
+  
+  # Distribute population into batchs
+  def batch(self):
+    # Group members into training batches
+    batch_cnt = math.ceil(len(self.members) / Population.BATCH_SZ) 
+    self.batches = [[] for i in range(batch_cnt)]
+    self.current_batch = 0
+
+    # Distribute agents
+    for idx, agent in enumerate(self.members):
+      assert len(self.batches[idx % batch_cnt]) <= Population.BATCH_SZ
+      self.batches[idx % batch_cnt].append(agent)  
+
+  # Get current batch
+  def get_batch(self):
+    if self.current_batch >= len(self.batches):
+      # Out of range
+      return []
+    return self.batches[self.current_batch] 
+
+  # Update current batch
+  def update_batch(self):
+    self.current_batch += 1

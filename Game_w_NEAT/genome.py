@@ -14,31 +14,36 @@ class Genome():
   c2 = 1.0
   # c3 = 0.4
   c3 = 3.0 # For larger populations with room for more species
-  c_threshold = 3.0
+  c_threshold = 3.0 
+  # c_threshold = 4.0 # For larger populations to accommodate the increased c3
   '''
   in_nodes: Number of input nodes
   out_nodes: Number of output nodes
   '''
-  def __init__(self, in_nodes_cnt=10, out_nodes_cnt=6, initialize_nodes=True):
+  def __init__(self, in_nodes_cnt=7, out_nodes_cnt=4, initialize_nodes=True):
     self.in_nodes_cnt = in_nodes_cnt
     self.out_nodes_cnt = out_nodes_cnt
 
     self.nodes = []
     self.edges = []
 
-    if not initialize_nodes:
-      return
-
     # Create input nodes
     in_nodes = []
     for i in range(self.in_nodes_cnt):
-      in_nodes.append(Node(i)) # Input node ids remain the same
+      in_nodes.append(Node(i, _input=True)) # Input node ids remain the same
     
     # Create output nodes
     out_nodes = []
     for i in range(self.out_nodes_cnt):
-      out_nodes.append(Node(self.in_nodes_cnt + i)) # Output node ids remain the same
-    
+      out_nodes.append(Node(self.in_nodes_cnt + i, output=True)) # Output node ids remain the same
+
+    # Store input and output nodes
+    self.nodes.extend(in_nodes)
+    self.nodes.extend(out_nodes)
+
+    if not initialize_nodes: # DEBUG - change this name (initialize_edge_bias??)
+      return
+   
     # Initialize edges
     for in_node in in_nodes:
       # Create edges between all output nodes
@@ -50,11 +55,9 @@ class Genome():
         # Add edge to endpoints (nodes)
         in_node.add_edge(edge) # The utility of list is shown in feedforward.py
         out_node.add_edge(edge)
+        break
+      break
     
-    # Store input and output nodes
-    self.nodes.extend(in_nodes)
-    self.nodes.extend(out_nodes)
-  
   # Determine if genome contains matching gene (edge)
   def has_matching(self, edge):
     for candidate in self.edges:
@@ -81,6 +84,11 @@ class Genome():
   # Add new node
   def add_node(self):
     edges = self.all_edges()
+
+    # DEBUG if
+    if len(edges) == 0:
+      print("NO EDGES")
+      return
     assert len(edges) != 0
 
     # Select random edge 
@@ -104,7 +112,7 @@ class Genome():
     # Create new node
     new_node = Node(len(self.nodes)) # TODO: Explicit node_id should be removed in place of static Node variable
 
-    # Create new edges - (names are to be read as relative to the new node)
+    # Create new edges (names are to be read as relative to the new node)
     in_bound_edge = Edge(in_node, new_node, weight=1)
     out_bound_edge = Edge(new_node, in_node, weight=weight) 
 
@@ -153,7 +161,7 @@ class Genome():
   def mutate(self):
     '''
     - 80% chance weights are mutated 
-    - 5%  chance connection is added
+    - 5%  chance connection is added - 30% for large populations
     - 3%  chance node is added
     '''
 
@@ -166,7 +174,7 @@ class Genome():
     
     # Add connection
     rand = random.uniform(0, 1)
-    if rand < 0.05:
+    if rand < 0.30:
       self.add_connection()
     
     # Add node
@@ -218,13 +226,14 @@ class Genome():
     # print("E: %f, D: %f, W: %f, Compatibility: %f" % (E, D, W, comp))
     return comp
 
-  # Set edges - for clarity
+  # Set edges 
   def set_edges(self, new_edges):
     self.edges = new_edges
   
-  # Set nodes - for clarity
+  # Set nodes 
   def set_nodes(self, new_nodes):
-    self.nodes = new_nodes
+    # Extend is used to preserve input and output nodes
+    self.nodes.extend(new_nodes)
 
   # Determine if genes are compatible - i.e. of the same species
   @staticmethod
@@ -319,23 +328,26 @@ class Genome():
     node_ids = set([edge_data[0] for edge_data in edges_data] + 
                    [edge_data[1] for edge_data in edges_data])
     # Create nodes
-    nodes = [Node(_id) for _id in node_ids]
+    nodes = [Node(_id) for _id in node_ids if _id < 11] # DEBUG
 
     # Create all edges and add edges to nodes
     edges = []
     for in_node_id, out_node_id, active, weight in edges_data:
-      # Get nodes - O(n), can be improved
-      in_node = next((node for node in nodes if node._id == in_node_id))
-      out_node = next((node for node in nodes if node._id == out_node_id))
+      # DEBUG - try catch (because node _id might node have an associated node)
+      try: 
+        # Get nodes - O(n), can be improved
+        in_node = next((node for node in nodes if node._id == in_node_id))
+        out_node = next((node for node in nodes if node._id == out_node_id))
+        # Create edge 
+        edge = Edge(in_node, out_node, active, weight)
 
-      # Create edge 
-      edge = Edge(in_node, out_node, active, weight)
+        # Add edge to nodes
+        in_node.add_edge(edge)
+        out_node.add_edge(edge)
 
-      # Add edge to nodes
-      in_node.add_edge(edge)
-      out_node.add_edge(edge)
-
-      edges.append(edge)
+        edges.append(edge)
+      except:
+        continue
 
     # Update child genome with edges and nodes 
     clone.set_edges(edges)

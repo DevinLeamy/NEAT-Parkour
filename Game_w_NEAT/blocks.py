@@ -6,7 +6,7 @@ from pygame import Rect
 # Block
 class Block(pygame.sprite.Sprite):
   SHIFT_SZ = 5
-  def __init__(self, row, col, image_path=Tile.GRASS):
+  def __init__(self, row, col, image_path=None):
     self.row = row 
     self.col = col
 
@@ -15,11 +15,14 @@ class Block(pygame.sprite.Sprite):
     
     super(Block, self).__init__()
     
-    # Set sprite image
-    self.image = LOAD.load_image(image_path)
-    self.image = pygame.transform.scale(self.image, (BLOCK_SZ, BLOCK_SZ))
-    # Scale image to BLOCK_SZ X BLOCK_SZ
-    self.rect = self.image.get_rect()
+    if image_path != None:
+      # Set sprite image
+      self.image = LOAD.load_image(image_path)
+      self.image = pygame.transform.scale(self.image, (BLOCK_SZ, BLOCK_SZ))
+      # Scale image to BLOCK_SZ X BLOCK_SZ
+      self.rect = self.image.get_rect()
+    else:
+      self.rect = pygame.Rect(0, 0, BLOCK_SZ, BLOCK_SZ)
     self.rect.topleft = [self.col * BLOCK_SZ, self.row * BLOCK_SZ]
   
   # Decrease col 
@@ -47,7 +50,6 @@ class Block(pygame.sprite.Sprite):
     # SHIFT_SZ must be a divisor of BLOCK_SZ
     while BLOCK_SZ % Block.SHIFT_SZ != 0:
       Block.SHIFT_SZ += 1
-    assert BLOCK_SZ % Block.SHIFT_SZ == 0
   
   # Returns block type Id 
   def get_block_type(self):
@@ -71,22 +73,11 @@ class Block(pygame.sprite.Sprite):
 # Air block
 class Air(Block):
   def __init__(self, row, col):
+    super().__init__(row, col, None)
     self.row = row
     self.col = col
 
     self.solid = False
-
-  # Block Override: Decrease col
-  def decrease_col(self):
-    self.col -= 1 
-
-  # Block Override: Do nothing 
-  def shift(self):
-    return
-  
-  # Block Override: Does not have left
-  def get_block_start(self):
-    return 0
 
 # Wall block
 class WallBlock(Block):

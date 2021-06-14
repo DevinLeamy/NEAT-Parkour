@@ -240,10 +240,12 @@ class Player(pygame.sprite.Sprite):
     ]
     if self.animating == Move.SLD:
       # One tall || cannot stand on wall blocks
-      return (blocks[0][0].solid and not blocks[0][0].get_block_type() == Tile.WALL_ID) or (blocks[0][1].solid and not blocks[0][1].get_block_type() == Tile.WALL_ID) 
+      # return (blocks[0][0].solid and not blocks[0][0].get_block_type() == Tile.WALL_ID) or (blocks[0][1].solid and not blocks[0][1].get_block_type() == Tile.WALL_ID) 
+      return blocks[0][0].solid or blocks[0][1].solid
 
     # Two tall || cannot stand on wall blocks
-    return (blocks[1][0].solid and not blocks[1][0].get_block_type() == Tile.WALL_ID) or (blocks[1][1].solid and not blocks[1][1].get_block_type() == Tile.WALL_ID) 
+    # return (blocks[1][0].solid and not blocks[1][0].get_block_type() == Tile.WALL_ID) or (blocks[1][1].solid and not blocks[1][1].get_block_type() == Tile.WALL_ID) 
+    return blocks[1][0].solid or blocks[1][1].solid
 
   # Check for obstacle collisions
   def colliding(self, grid):
@@ -282,16 +284,14 @@ class Player(pygame.sprite.Sprite):
       # Substration to make value smaller
       height=abs(self.head_row - Level.GRND),
       # Might be able to use the raw assignment
-      sliding=1 if self.animating == Move.RUN else 0,
+      sliding=1 if self.animating == Move.SLD else 0,
       # Block type of upcoming blocks
       type1=grid[Level.GRND - 1][self.LEFT_BUFFER + 1].get_block_type(),
       type2=grid[Level.GRND - 2][self.LEFT_BUFFER + 1].get_block_type(),
-      type3=grid[Level.GRND - 3][self.LEFT_BUFFER + 1].get_block_type(),
-      type4=grid[Level.GRND - 1][self.LEFT_BUFFER + 2].get_block_type(),
-      type5=grid[Level.GRND - 2][self.LEFT_BUFFER + 2].get_block_type(),
-      type6=grid[Level.GRND - 3][self.LEFT_BUFFER + 2].get_block_type(),
+      type3=grid[Level.GRND - 1][self.LEFT_BUFFER + 2].get_block_type(),
+      type4=grid[Level.GRND - 2][self.LEFT_BUFFER + 2].get_block_type(),
       # Next block col
-      dist=grid[Level.GRND - 1][self.LEFT_BUFFER + 2].get_block_start(),
+      dist=grid[Level.GRND - 1][self.LEFT_BUFFER + 1].get_block_start(),
       # Block shift (distance travelled per update; used to set game speed) 
       shift_sz=Block.SHIFT_SZ
     )

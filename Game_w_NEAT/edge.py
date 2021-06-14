@@ -16,12 +16,12 @@ class Edge():
   weight: Weight of the edge
   inv: Innovation number of the edge
   '''
-  def __init__(self, in_node, out_node, active=True, weight=random.uniform(-1, 1)):
+  def __init__(self, in_node, out_node, active=True, weight=None):
     self.in_node = in_node
     self.out_node = out_node
     self.active = active
-    self.weight = weight
-    
+    self.weight = weight if weight != None else random.uniform(-1, 1)
+
     inv = EdgeHistory.get_innovation_number(in_node, out_node)
     if inv == -1:
       # New edge
@@ -40,12 +40,12 @@ class Edge():
       self.weight = random.uniform(-1, 1) 
     else:
       # Uniformly perturbed (slight change) - 90% chance
-      mutate_power = 2
-      self.weight = self.clamp(random.gauss(0.0, 2))
+      self.weight = self.clamp(self.weight + random.gauss(0, 0.2))
   
   # Squeeze input between a range
   def clamp(self, x):
-    return min(max(-1, x), 1)
+    return x # DEBUG
+    # return min(max(-1.0, x), 1.0)
 
   # Disable edge
   def disable(self):
