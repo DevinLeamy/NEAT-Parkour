@@ -215,5 +215,6 @@ for gen in range(GENERATIONS):
       CLK.tick(DELAY)
     game.next_batch()
   game.next_generation()
+  print("Best fitness: %d" % (game.population.get_best_fitness()))
 
 pygame.display.quit()

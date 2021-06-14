@@ -19,8 +19,6 @@ class Feedforward():
         # For input node, _id acts as index in input values list
         node.feed_input(inputs[node._id])
     
-    # assert sum([1 for node in self.nodes if node.is_input()]) == 6 # DEBUG
-
     # Preform feedforward over layers of NN 
     for layer in self.layers:
       for node in layer:
@@ -29,29 +27,37 @@ class Feedforward():
     # Determine output (decision)
     out_nodes = [node for node in self.nodes if node.is_output()]
 
+    # print([round(node.out_val, 4) for node in out_nodes])
     # Find idx of output node with max value
-    decision = 0
+    decision = [0]
     max_val = out_nodes[0].out_val
-    for idx, node in enumerate(out_nodes[1:]):
+    for idx, node in enumerate(out_nodes):
       if max_val < node.out_val:
         max_val = node.out_val
-        decision = idx
-    return decision
+        decision = [idx]
+      elif max_val == node.out_val:
+        decision.append(idx)
+    # If outputs are tied, choose a random one
+    return random.choice(decision)
 
   # Check if network is full connected
   def fully_connected(self):
-    for idx, layer in enumerate(self.layers[:-1]): # Excludes output layer
+    for idx, layer in enumerate(self.layers[:-1]): 
+      # Exclude output nodes
+      nodes = [node for node in layer if not node.is_output()]
+
       # Maximum possible outgoing connections
-      max_connections = len(self.layers[idx]) * len(self.layers[idx + 1]) 
+      max_connections = len(nodes) * len(self.layers[idx + 1]) 
 
       total_connections = 0
-      for node in layer:
+      for node in nodes:
         total_connections += len(node.out_bound_edges) 
       
       assert total_connections <= max_connections
       if total_connections < max_connections:
         # Not fully connected 
         return False
+
     # Fully connected 
     return True
   
@@ -71,7 +77,8 @@ class Feedforward():
     potential_start = [] # (node, layer)
     for idx, layer in enumerate(self.layers[:-1]): # Output node can't have outbound edges 
       next_layer_sz = len(self.layers[idx + 1])
-      for node in layer:
+
+      for node in [node for node in layer if not node.is_output()]: # Exclude output nodes
         if len(node.out_bound_edges) != next_layer_sz:
           # Has space
           potential_start.append((node, idx))
@@ -118,10 +125,6 @@ class Feedforward():
       if len(new_layer) != 0:
         self.layers.append(new_layer)
       layer = new_layer
-    # if len(self.layers) > 2:
-    #   for idx, layer in enumerate(self.layers):
-    #     print("Layer %d:" % (idx), len(layer))
-    # print("Layers: ", len(self.layers))
 
 
     

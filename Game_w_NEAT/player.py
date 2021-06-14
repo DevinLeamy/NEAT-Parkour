@@ -282,14 +282,14 @@ class Player(pygame.sprite.Sprite):
       # Substration to make value smaller
       height=abs(self.head_row - Level.GRND),
       # Might be able to use the raw assignment
-      sliding=1 if self.animating == Move.RUN else 0,
+      sliding=1 if self.animating == Move.SLD else 0,
       # Block type of upcoming blocks
       type1=grid[Level.GRND - 1][self.LEFT_BUFFER + 1].get_block_type(),
       type2=grid[Level.GRND - 2][self.LEFT_BUFFER + 1].get_block_type(),
       type3=grid[Level.GRND - 1][self.LEFT_BUFFER + 2].get_block_type(),
       type4=grid[Level.GRND - 2][self.LEFT_BUFFER + 2].get_block_type(),
       # Next block col
-      dist=grid[Level.GRND - 1][self.LEFT_BUFFER + 2].get_block_start(),
+      dist=grid[Level.GRND - 1][self.LEFT_BUFFER + 1].get_block_start(),
       # Block shift (distance travelled per update; used to set game speed) 
       shift_sz=Block.SHIFT_SZ
     )

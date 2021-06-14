@@ -14,7 +14,8 @@ class Genome():
   c2 = 1.0
   # c3 = 0.4
   c3 = 3.0 # For larger populations with room for more species
-  c_threshold = 3.0
+  c_threshold = 3.0 
+  # c_threshold = 4.0 # For larger populations to accommodate the increased c3
   '''
   in_nodes: Number of input nodes
   out_nodes: Number of output nodes
@@ -104,7 +105,7 @@ class Genome():
     # Create new node
     new_node = Node(len(self.nodes)) # TODO: Explicit node_id should be removed in place of static Node variable
 
-    # Create new edges - (names are to be read as relative to the new node)
+    # Create new edges (names are to be read as relative to the new node)
     in_bound_edge = Edge(in_node, new_node, weight=1)
     out_bound_edge = Edge(new_node, in_node, weight=weight) 
 
