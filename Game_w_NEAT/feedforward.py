@@ -8,8 +8,8 @@ class Feedforward():
   def __init__(self, nodes):
     self.nodes = nodes
     self.generate_layers()
-    print(len(nodes))
-    print(sum([1 for node in nodes if node.is_output()]))
+    # print(len(nodes))
+    # print(sum([1 for node in nodes if node.is_output()]))
 
   # Compute output from input
   # inputs: int[] (not Input class)
@@ -29,7 +29,6 @@ class Feedforward():
     # Determine output (decision)
     out_nodes = [node for node in self.nodes if node.is_output()]
 
-    # print([round(node.out_val, 4) for node in out_nodes])
     # Find idx of output node with max value
     decision = [0]
     max_val = out_nodes[0].out_val
@@ -44,12 +43,17 @@ class Feedforward():
 
   # Check if network is full connected
   def fully_connected(self):
-    for idx, layer in enumerate(self.layers[:-1]): 
+    for i, layer in enumerate(self.layers[:-1]): 
       # Exclude output nodes
       nodes = [node for node in layer if not node.is_output()]
 
+      # Calculate the number of nodes in all layers after i
+      nodes_infront = 0
+      for next_layer in self.layers[i + 1:]:
+        nodes_infront += len(next_layer)
+
       # Maximum possible outgoing connections
-      max_connections = len(nodes) * len(self.layers[idx + 1]) 
+      max_connections = len(nodes) * nodes_infront
 
       total_connections = 0
       for node in nodes:
@@ -60,6 +64,7 @@ class Feedforward():
         # Not fully connected 
         return False
 
+    print("Fully connected")
     # Fully connected 
     return True
   
@@ -68,22 +73,33 @@ class Feedforward():
   def get_random_compatible_nodes(self):
     # Collect nodes that can have inbound edges 
     potential_end = [] # (node, layer)
-    for idx, layer in enumerate(self.layers[1:]): # Input node can't be have inbound edges 
-      previous_layer_sz = len(self.layers[idx - 1])
+    # Number of nodes in previous layers
+    previous_nodes = len(self.layers[0])
+
+    for idx in range(1, len(self.layers)): # Input node can't be have inbound edges 
+      layer = self.layers[idx]
       for node in layer:
-        if len(node.in_bound_edges) != previous_layer_sz:
+        if len(node.in_bound_edges) < previous_nodes:
           # Has space
-          potential_endpoints.append((node, idx))
+          potential_end.append((node, idx))
+      previous_nodes += len(layer)
 
     # Collect nodes that can have outbound edges 
     potential_start = [] # (node, layer)
-    for idx, layer in enumerate(self.layers[:-1]): # Output node can't have outbound edges 
-      next_layer_sz = len(self.layers[idx + 1])
 
-      for node in [node for node in layer if not node.is_output()]: # Exclude output nodes
-        if len(node.out_bound_edges) != next_layer_sz:
+    # Number of nodes in following layers
+    next_nodes = len([node for node in self.nodes if node.is_output()]) # Number of output nodes
+
+    # Output node can't have outbound edges 
+    # Fancy range: Iterates is reversed order, ignoring the last layer
+    for idx in range(len(self.layers) - 2, -1, -1): 
+      layer = self.layers[idx]
+      non_output_nodes = [node for node in layer if not node.is_output()]
+      for node in non_output_nodes: # Exclude output nodes
+        if len(node.out_bound_edges) != next_nodes:
           # Has space
           potential_start.append((node, idx))
+      next_nodes += len(non_output_nodes)
     
     # Shuffle nodes to make selection random
     random.shuffle(potential_start)
@@ -108,7 +124,7 @@ class Feedforward():
     # Collect input nodes (first layer is input)
     layer = [node for node in self.nodes if node.is_input()]
     self.layers.append(layer)
-    
+
     # Set of node _ids that have been visited
     seen = set() 
     # BFS
@@ -127,6 +143,15 @@ class Feedforward():
       if len(new_layer) != 0:
         self.layers.append(new_layer)
       layer = new_layer
+    
+    # Outputs never visited
+    outputs = [node for node in self.nodes if node.is_output() and not node._id in seen]
+
+    # for idx, layer in enumerate(self.layers):
+    #   print("IDX %d" % (idx), len(layer))
+    
+    # Add outputs to last layer
+    self.layers[-1].extend(outputs)
 
 
     
