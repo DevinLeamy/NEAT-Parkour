@@ -49,10 +49,6 @@ class Species():
     # Update staleness 
     self.staleness = 0 if self.best_fitness > previous_best else self.staleness + 1
     
-    # Fitness sharing || commented out to DEBUG
-    # for agent in self.members:
-    #   agent.update_adjusted_fitness(len(self.members))
-      
     # Total sum of member fitnesses
     total_fitness = sum([agent.fitness for agent in self.members])
 
@@ -87,12 +83,12 @@ class Species():
     assert pop_average_sum != 0
     offspring = int(self.average_fitness / pop_average_sum * pop_size) 
 
-    # The weekest half of the population has been removed
-    offspring *= 2
-
     if len(self.members) >= 5:
       # Champ has already been added
       offspring -= 1
+
+    # The weekest half of the population has been removed
+    offspring *= 2
     return offspring
 
   # Produce offspring

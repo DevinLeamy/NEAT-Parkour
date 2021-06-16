@@ -20,7 +20,7 @@ class Genome():
   in_nodes: Number of input nodes
   out_nodes: Number of output nodes
   '''
-  def __init__(self, in_nodes_cnt=7, out_nodes_cnt=4, initialize_nodes=True):
+  def __init__(self, in_nodes_cnt=6, out_nodes_cnt=4, initialize_nodes=True):
     self.in_nodes_cnt = in_nodes_cnt
     self.out_nodes_cnt = out_nodes_cnt
 
@@ -110,11 +110,12 @@ class Genome():
     edge.disable() 
 
     # Create new node
-    new_node = Node(len(self.nodes)) # TODO: Explicit node_id should be removed in place of static Node variable
+    new_node = Node()
+    self.nodes.append(new_node)
 
     # Create new edges (names are to be read as relative to the new node)
     in_bound_edge = Edge(in_node, new_node, weight=1)
-    out_bound_edge = Edge(new_node, in_node, weight=weight) 
+    out_bound_edge = Edge(new_node, out_node, weight=weight) 
 
     # Add edges to nodes and genome
     self.edges.append(in_bound_edge)
@@ -196,7 +197,7 @@ class Genome():
     rand = random.uniform(0, 1)
     if rand < 0.03:
       self.add_node()
-
+  
   # Calculate compatibility of two genomes 
   @staticmethod
   def compatibility(genome_1, genome_2):

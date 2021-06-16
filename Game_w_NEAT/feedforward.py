@@ -30,16 +30,13 @@ class Feedforward():
     out_nodes = [node for node in self.nodes if node.is_output()]
 
     # Find idx of output node with max value
-    decision = [0]
+    decision = 0
     max_val = out_nodes[0].out_val
     for idx, node in enumerate(out_nodes):
       if max_val < node.out_val:
         max_val = node.out_val
-        decision = [idx]
-      elif max_val == node.out_val:
-        decision.append(idx)
-    # If outputs are tied, choose a random one
-    return random.choice(decision)
+        decision = idx
+    return decision 
 
   # Check if network is full connected
   def fully_connected(self):
@@ -128,18 +125,20 @@ class Feedforward():
     # Set of node _ids that have been visited
     seen = set() 
     # BFS
-    while (len(layer) != 0):
+    while len(layer) != 0:
       new_layer = []
       for node in layer:
+        if node._id in seen:
+          continue
+        # Node has been seen
+        seen.add(node._id)
         for edge in node.out_bound_edges:
           if not edge.active: # Only active edges participate in feedforward 
             continue
           new_node = edge.out_node
           # Avoid duplicates
-          if not new_node in new_layer and not new_node._id in seen: 
+          if not new_node._id in seen: 
             new_layer.append(new_node)
-            # Node has been seen
-            seen.add(new_node._id) 
       if len(new_layer) != 0:
         self.layers.append(new_layer)
       layer = new_layer

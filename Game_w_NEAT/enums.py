@@ -18,7 +18,7 @@ class Tile():
   GRASS = "Tiles/GrassMid.png"
   DIRT = "Tiles/Dirt.png"
   WALL = "Tiles/Crate.png"
-  HARD = "Tiles/Stone.png"
+  HARD = "Tiles/Brick.png"
   AIR = "Tiles/Air.png"
 
   GRASS_ID = 0
