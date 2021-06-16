@@ -58,7 +58,7 @@ class Population():
         if agent.fitness > current_gen_best.fitness:
           current_gen_best = agent
     
-    if (current_gen_best.fitness > self.best_agent.fitness):
+    if current_gen_best.fitness > self.best_agent.fitness:
       # Replace current best agent 
       self.best_agent = Agent.clone(current_gen_best, copy_fitness=True)
   

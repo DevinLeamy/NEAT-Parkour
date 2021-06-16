@@ -3,6 +3,8 @@ import numpy as np
 
 # Single node in NN 
 class Node():
+  # Global node id
+  next_id = 101
   '''
   _id: Node identifier
   in_val: Input value or sum of input values
@@ -10,12 +12,16 @@ class Node():
   _input: Is input node (underscore to avoid naming conflicts)
   output: Is output node
   '''
-  def __init__(self, _id, in_val=0.0, out_val=0.0, _input=False, output=False):
-    self._id = _id # Id should be set by a static Node.global_id variable
+  def __init__(self, _id=None, in_val=0.0, out_val=0.0, _input=False, output=False):
     self.in_val = in_val
     self.out_val = out_val
     self._input = _input
     self.output = output
+    if _id == None:
+      _id = Node.next_id 
+      Node.next_id += 1
+    self._id = _id
+      
 
     # Edges leading into and out of the node
     self.out_bound_edges = [] 

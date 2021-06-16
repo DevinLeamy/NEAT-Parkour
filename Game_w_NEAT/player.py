@@ -240,16 +240,18 @@ class Player(pygame.sprite.Sprite):
     ]
     if self.animating == Move.SLD:
       # One tall || cannot stand on wall blocks
-      # return (blocks[0][0].solid and not blocks[0][0].get_block_type() == Tile.WALL_ID) or (blocks[0][1].solid and not blocks[0][1].get_block_type() == Tile.WALL_ID) 
       return blocks[0][0].solid or blocks[0][1].solid
 
     # Two tall || cannot stand on wall blocks
-    # return (blocks[1][0].solid and not blocks[1][0].get_block_type() == Tile.WALL_ID) or (blocks[1][1].solid and not blocks[1][1].get_block_type() == Tile.WALL_ID) 
     return blocks[1][0].solid or blocks[1][1].solid
 
   # Check for obstacle collisions
   def colliding(self, grid):
-    row = int(self.head_row)
+    if self.animating == Move.FALL:
+      # Cannot collide while falling
+      return False
+    # Round to next block
+    row = int(round(self.head_row))
     # Next three blocks on the top and bottom
     blocks = [
       [grid[row][self.LEFT_BUFFER].collide(self._id), grid[row][self.LEFT_BUFFER + 1].collide(self._id), grid[row][self.LEFT_BUFFER + 2].collide(self._id)],
@@ -257,9 +259,9 @@ class Player(pygame.sprite.Sprite):
     ]
     if self.animating == Move.SLD:
       # Two wide
-      return blocks[0][1] or blocks[0][2]
+      return blocks[0][0] or blocks[0][1] or blocks[0][2]
     # One wide
-    return blocks[0][1] or blocks[1][1]
+    return blocks[0][0] or blocks[0][1] or blocks[1][1]
       
   # Update player state
   def update(self, grid):
@@ -280,18 +282,35 @@ class Player(pygame.sprite.Sprite):
   
   # Calculate inputs to Agent
   def measure(self, grid):
+    dist1, dist2 = (0, 0) 
+    type1, type2 = (0, 0)
+    # 15 represents the number of blocks in front of the player we look 
+    for i in range(15):
+      block1 = grid[Level.GRND - 1][self.LEFT_BUFFER + i]
+      block2 = grid[Level.GRND - 2][self.LEFT_BUFFER + i]
+      if dist1 == 0 and block1.solid:
+        dist1 = block1.get_block_start()
+        type1 = 1 if block1.get_block_type() == Tile.HARD_ID else 2
+      if dist2 == 0 and block2.solid:
+        dist2 = block2.get_block_start()
+        type2 = 1 if block2.get_block_type() == Tile.HARD_ID else 2
+
+    if dist1 == 0:
+      dist1 = 900 # Farthest distance
+      type1 = 2 # Breakable
+    if dist2 == 0:
+      dist2 = 900
+      type2 = 2
+
     return Input(
       # Substration to make value smaller
       height=abs(self.head_row - Level.GRND),
-      # Might be able to use the raw assignment
-      sliding=1 if self.animating == Move.SLD else 0,
-      # Block type of upcoming blocks
-      type1=grid[Level.GRND - 1][self.LEFT_BUFFER + 1].get_block_type(),
-      type2=grid[Level.GRND - 2][self.LEFT_BUFFER + 1].get_block_type(),
-      type3=grid[Level.GRND - 1][self.LEFT_BUFFER + 2].get_block_type(),
-      type4=grid[Level.GRND - 2][self.LEFT_BUFFER + 2].get_block_type(),
-      # Next block col
-      dist=grid[Level.GRND - 1][self.LEFT_BUFFER + 1].get_block_start(),
+      # Distance to upcoming hard blocks
+      dist1=dist1,
+      dist2=dist2,
+      # Blocks types of hard blocks - 1 is unbreakable, otherwise 2
+      type1=type1,
+      type2=type2,
       # Block shift (distance travelled per update; used to set game speed) 
       shift_sz=Block.SHIFT_SZ
     )

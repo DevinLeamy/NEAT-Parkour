@@ -20,6 +20,7 @@ from player import Player
 from game_map import Map
 from population import Population
 from blocks import Block
+from feedforward import Feedforward
 
 # Game  
 class Game:
@@ -53,8 +54,8 @@ class Game:
     # Font
     self.font = pygame.font.SysFont("couriernewttf", 17)
 
-    # Display batch numbers
-    self.update_batch_display()
+    # Display best agent genome
+    self.display_genome()
 
   # Display score, generation, population size, and best-agent fitness  
   def update_main_display(self):
@@ -63,9 +64,19 @@ class Game:
     generation = self.population.generation
     best_fitness = self.population.get_best_fitness()
     population_sz = self.population.get_population_size()
+    # +1 because batch numbers of 0 indexed
+    batch = self.population.current_batch + 1
+    batches = len(self.population.batches)
+
 
     # Display strings
-    display_str = [self.score_str(score), self.generation_str(generation), self.population_str(population_sz), self.fitness_str(best_fitness)]
+    display_str = [
+      self.score_str(score), 
+      self.generation_str(generation), 
+      self.population_str(population_sz), 
+      self.fitness_str(best_fitness), 
+      self.batch_str(batch, batches)
+    ]
 
     # Create and display 
     OFFSET = 10 # Left and top margin
@@ -77,26 +88,6 @@ class Game:
       # Display
       SCN.blit(display, display_rect)
   
-  # Display batch number
-  def update_batch_display(self):
-    # +1 because batch numbers of 0 indexed
-    batch = self.population.current_batch + 1
-    batches = len(self.population.batches)
-
-    # Display string
-    batch_str = self.batch_str(batch, batches)
-
-    OFFSET_TOP = 10
-    OFFSET_LEFT = 900
-
-    # Create display
-    batch_display = self.font.render(batch_str, True, Color.BLACK)
-    batch_rect = batch_display.get_rect()
-    batch_rect.topleft = (OFFSET_LEFT, OFFSET_TOP)
-
-    # Display
-    SCN.blit(batch_display, batch_rect)
-
   # Display species information
   def update_species_display(self):
     OFFSET_LEFT = 10
@@ -135,7 +126,7 @@ class Game:
     # Update displays
     self.update_main_display() 
     self.update_species_display()
-    self.update_batch_display()
+    self.display_genome()
 
     # Update game status, game continues so long as the population has active members
     self.done = not self.population.has_active()
@@ -187,9 +178,59 @@ class Game:
 
     # Draw sprites to screen
     self.sprites.draw(SCN)
+  
+  # Display the genome of the current best agent
+  def display_genome(self, genome=None, display=True):
+    genome = self.population.best_agent.genome if genome == None else genome
+    # Create network 
+    network = Feedforward(genome.nodes)
+    layers = network.layers
+
+    GAP = 50 # Distance between nodes
+    RAD = 11 # Radius of nodes
+    RIGHT_OFFSET = 800 # Right offset 
+    TOP_OFFSET = 50 # Top offset 
+    WIDTH = 5 # Line width
+    NUDGE = 10 # Horizontal nudge
+    MAX_LAYER = 7 # Max nodes we can expect in one layer
+
+    # Colors
+    COLORS = {
+      "active_edge": (0, 200, 0),
+      "disabled_edge": (200, 0, 0),
+      "node": (50, 50, 50),
+      "input_node": (0, 0, 150),
+      "output_node": (150, 0, 0)
+    }
+
+    # Store position of node centers, by node
+    node_positions = dict()
+    for i, layer in enumerate(layers):
+      for j, node in enumerate(layer):
+        position = (RIGHT_OFFSET + i * GAP + j * NUDGE, j * GAP + TOP_OFFSET +(MAX_LAYER - len(layer))//2 * GAP)
+        # Store position
+        node_positions[node] = position 
+        for edge in node.in_bound_edges:
+          edge_color = COLORS["active_edge"] if edge.active else COLORS["disabled_edge"]
+          if not display:
+            continue
+          print(edge.in_node._id, edge.out_node._id)
+          pygame.draw.line(SCN, edge_color, 
+                          node_positions[edge.in_node], 
+                          node_positions[edge.out_node], WIDTH)
+
+    # Draw nodes - done after so they cover the lines
+    if not display:
+      return
+    for node, position in node_positions.items():
+      color = COLORS["node"]
+      if node.is_input():
+        color = COLORS["input_node"]
+      if node.is_output():
+        color = COLORS["output_node"]
+      pygame.draw.circle(SCN, color, position, RAD)
 
 CLK = pygame.time.Clock()
-
 # Initialize game
 game = Game()
 state = State.RUNNING 
@@ -202,9 +243,11 @@ for gen in range(GENERATIONS):
       for event in pygame.event.get():
         if event.type == pygame.QUIT:
           running = False
-      
       # Displaying
       SCN.blit(LOAD.load_image("Tiles/Background.png"), (0, 0))
+      # TESTING
+      # for agent in game.population.members:
+      #   game.display_genome(agent.genome, display=False)
       game.update() 
       if game.done:
         # Game Over
