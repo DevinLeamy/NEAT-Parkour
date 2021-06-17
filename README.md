@@ -11,4 +11,4 @@ In NEAT-Parkour, I use my implementation of NEAT to train AIs to play a parkour-
 In the top right, you'll see the genome of current best agent. Input nodes are blue. Output nodes are red. Hidden nodes are grey. Active edges are green, inactive edges are red.
 
 ![NEAT2](https://user-images.githubusercontent.com/45083086/122322701-20e97180-cee3-11eb-95e4-bbfa3b44f246.png)
- 
+![NEAT3](https://user-images.githubusercontent.com/45083086/122326751-fea72200-cee9-11eb-9952-63fb2e188c36.png)
