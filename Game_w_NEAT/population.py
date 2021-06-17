@@ -1,6 +1,7 @@
 from agent import Agent
 from species import Species
 import math
+from config import MAX_STALENESS
 
 # Controller of all members of the population
 class Population():
@@ -65,7 +66,7 @@ class Population():
   # Prune stale species
   def prune_stale_species(self):
     for species in self.species:
-      if species.staleness >= 15: # TODO: Make this variable configurable
+      if species.staleness >= MAX_STALENESS:
         # Remove species
         self.species.remove(species)
   
@@ -165,7 +166,7 @@ class Population():
   
   # Sort species by their average fitness 
   def sort_species(self, decreasing=True):
-    self.species.sort(key=lambda species : species.average_fitness, reverse=decreasing)
+    self.species.sort(key=lambda species : species.best_fitness, reverse=decreasing)
   
   # Increase game speed for batch
   def increase_speed(self):

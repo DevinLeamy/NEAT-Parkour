@@ -259,9 +259,9 @@ class Player(pygame.sprite.Sprite):
     ]
     if self.animating == Move.SLD:
       # Two wide
-      return blocks[0][0] or blocks[0][1] or blocks[0][2]
+      return blocks[0][1] or blocks[0][2]
     # One wide
-    return blocks[0][0] or blocks[0][1] or blocks[1][1]
+    return blocks[0][1] or blocks[1][1]
       
   # Update player state
   def update(self, grid):

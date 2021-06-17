@@ -118,20 +118,21 @@ class Feedforward():
     1. Find input nodes (some with not edges leading into them)
     2. Preform BFS, storing nodes at depth i in layers[i] 
     '''
-    # Collect input nodes (first layer is input)
-    layer = [node for node in self.nodes if node.is_input()]
-    self.layers.append(layer)
-
+    # First layer of nodes 
+    current_layer = [node for node in self.nodes if node.is_input()]
     # Set of node _ids that have been visited
     seen = set() 
+
     # BFS
-    while len(layer) != 0:
+    while len(current_layer) != 0:
+      self.layers.append([])
       new_layer = []
-      for node in layer:
+      for node in current_layer:
         if node._id in seen:
           continue
         # Node has been seen
         seen.add(node._id)
+        self.layers[-1].append(node)
         for edge in node.out_bound_edges:
           if not edge.active: # Only active edges participate in feedforward 
             continue
@@ -139,16 +140,11 @@ class Feedforward():
           # Avoid duplicates
           if not new_node._id in seen: 
             new_layer.append(new_node)
-      if len(new_layer) != 0:
-        self.layers.append(new_layer)
-      layer = new_layer
+      current_layer = new_layer
     
     # Outputs never visited
     outputs = [node for node in self.nodes if node.is_output() and not node._id in seen]
 
-    # for idx, layer in enumerate(self.layers):
-    #   print("IDX %d" % (idx), len(layer))
-    
     # Add outputs to last layer
     self.layers[-1].extend(outputs)
 

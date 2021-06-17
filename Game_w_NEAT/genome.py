@@ -1,6 +1,7 @@
 from edge import Edge
 from node import Node
 from feedforward import Feedforward
+from config import INPUT_NODES, OUTPUT_NODES
 import random
 
 class Genome():
@@ -20,9 +21,9 @@ class Genome():
   in_nodes: Number of input nodes
   out_nodes: Number of output nodes
   '''
-  def __init__(self, in_nodes_cnt=6, out_nodes_cnt=4, initialize_nodes=True):
-    self.in_nodes_cnt = in_nodes_cnt
-    self.out_nodes_cnt = out_nodes_cnt
+  def __init__(self, initialize_nodes=True):
+    self.in_nodes_cnt = INPUT_NODES
+    self.out_nodes_cnt = OUTPUT_NODES 
 
     self.nodes = []
     self.edges = []
@@ -190,7 +191,7 @@ class Genome():
     
     # Add connection
     rand = random.uniform(0, 1)
-    if rand < 0.30:
+    if rand < 0.08:
       self.add_connection()
     
     # Add node

@@ -117,7 +117,7 @@ class Game:
     self.game_map.update()
 
     # Increase speed 
-    if self.updates % 500 == 0:
+    if self.updates % UPDATES_PER_INC == 0:
       self.population.increase_speed()
       self.game_map.ask_increase = True
 
@@ -209,21 +209,22 @@ class Game:
       for j, node in enumerate(layer):
         position = (RIGHT_OFFSET + i * GAP + j * NUDGE, j * GAP + TOP_OFFSET +(MAX_LAYER - len(layer))//2 * GAP)
         # Store position
-        node_positions[node] = position 
+        node_positions[node._id] = position 
         for edge in node.in_bound_edges:
           edge_color = COLORS["active_edge"] if edge.active else COLORS["disabled_edge"]
           if not display:
             continue
-          print(edge.in_node._id, edge.out_node._id)
+          # Line width depends on edge width - width increased with magnitude 
           pygame.draw.line(SCN, edge_color, 
-                          node_positions[edge.in_node], 
-                          node_positions[edge.out_node], WIDTH)
+                          node_positions[edge.in_node._id], 
+                          node_positions[edge.out_node._id], max(1, int(abs(WIDTH * edge.weight))))
 
     # Draw nodes - done after so they cover the lines
     if not display:
       return
-    for node, position in node_positions.items():
+    for node_id, position in node_positions.items():
       color = COLORS["node"]
+      node = genome.get_node(node_id)
       if node.is_input():
         color = COLORS["input_node"]
       if node.is_output():
@@ -245,9 +246,6 @@ for gen in range(GENERATIONS):
           running = False
       # Displaying
       SCN.blit(LOAD.load_image("Tiles/Background.png"), (0, 0))
-      # TESTING
-      # for agent in game.population.members:
-      #   game.display_genome(agent.genome, display=False)
       game.update() 
       if game.done:
         # Game Over
