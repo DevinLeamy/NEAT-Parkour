@@ -12,6 +12,10 @@ class Player(pygame.sprite.Sprite):
 
   def __init__(self):
     super(Player, self).__init__()
+    # Create random
+    self.random = random.Random()
+    self.random.seed(SEED)
+
     # Status
     self.alive = True
 
@@ -51,7 +55,7 @@ class Player(pygame.sprite.Sprite):
     self.animating = Move.RUN
     
     # Current animation frame
-    self.animation_id = random.choice(list(self.runs.keys()))
+    self.animation_id = self.random.choice(list(self.runs.keys()))
     self.get_frame_increment = lambda updates_per_frame : 1 / updates_per_frame
     self.current_frame = 0.0
     self.updates_per_frame = self.runs[self.animation_id][1]
@@ -59,13 +63,13 @@ class Player(pygame.sprite.Sprite):
   # Jumps
   def jump(self):
     # Player is already in motion
-    if not (self.animating == Move.RUN) and not (self.animating == Move.JMP):
+    if self.animating != Move.RUN:
       return
     
     # Begins jumping
     self.animating = Move.JMP
     self.current_frame = 0.0
-    self.animation_id = random.choice(list(self.jumps.keys()))
+    self.animation_id = self.random.choice(list(self.jumps.keys()))
     self.updates_per_frame = self.jumps[self.animation_id][1]
 
   # Fall
@@ -80,24 +84,24 @@ class Player(pygame.sprite.Sprite):
     # Begin falling
     self.animating = Move.FALL
     self.current_frame = 0.0
-    self.animation_id = random.choice(list(self.falls.keys()))
+    self.animation_id = self.random.choice(list(self.falls.keys()))
     self.updates_per_frame = self.falls[self.animation_id][1]
 
   # Slide
   def slide(self):
-    if (not self.animating == Move.RUN) or self.animating == Move.SLD:
+    if self.animating != Move.RUN:
       return
     
     # Begins sliding
     self.head_row += 1
     self.animating = Move.SLD
     self.current_frame = 0.0
-    self.animation_id = random.choice(list(self.slides.keys()))
+    self.animation_id = self.random.choice(list(self.slides.keys()))
     self.updates_per_frame = self.slides[self.animation_id][1]
   
   # Attack
   def attack(self, game_map):
-    if not (self.animating == Move.RUN) and not (self.animating == Move.ATK):
+    if self.animating != Move.RUN:
       return
 
     # Break blocks
@@ -107,18 +111,15 @@ class Player(pygame.sprite.Sprite):
     # Starts attacking
     self.animating = Move.ATK
     self.current_frame = 0.0
-    self.animation_id = random.choice(list(self.attacks.keys()))
+    self.animation_id = self.random.choice(list(self.attacks.keys()))
     self.updates_per_frame = self.attacks[self.animation_id][1]
   
   # Run
   def run(self):
-    if self.animating == Move.RUN:
-      return
-    
     # Starts running 
     self.animating = Move.RUN
     self.current_frame = 0.0
-    self.animation_id = random.choice(list(self.runs.keys()))
+    self.animation_id = self.random.choice(list(self.runs.keys()))
     self.updates_per_frame = self.runs[self.animation_id][1]
     
   # Get image
@@ -240,10 +241,12 @@ class Player(pygame.sprite.Sprite):
     ]
     if self.animating == Move.SLD:
       # One tall || cannot stand on wall blocks
-      return blocks[0][0].solid or blocks[0][1].solid
+      return (blocks[0][0].solid and blocks[0][0].get_block_type() != Tile.WALL_ID) or (blocks[0][1].solid and blocks[0][1].get_block_type() != Tile.WALL_ID)
+      # return blocks[0][0].solid or blocks[0][1].solid
 
     # Two tall || cannot stand on wall blocks
-    return blocks[1][0].solid or blocks[1][1].solid
+    return (blocks[1][0].solid and blocks[1][0].get_block_type() != Tile.WALL_ID) or (blocks[1][1].solid and blocks[1][1].get_block_type() != Tile.WALL_ID)
+    # return blocks[1][0].solid or blocks[1][1].solid
 
   # Check for obstacle collisions
   def colliding(self, grid):

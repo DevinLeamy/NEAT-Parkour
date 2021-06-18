@@ -215,9 +215,14 @@ class Game:
           if not display:
             continue
           # Line width depends on edge width - width increased with magnitude 
-          pygame.draw.line(SCN, edge_color, 
-                          node_positions[edge.in_node._id], 
-                          node_positions[edge.out_node._id], max(1, int(abs(WIDTH * edge.weight))))
+          try:
+            pygame.draw.line(SCN, edge_color, 
+                            node_positions[edge.in_node._id], 
+                            node_positions[edge.out_node._id], max(1, int(abs(WIDTH * edge.weight))))
+          except Exception as err:
+            print(edge.in_node._id)
+            print(edge.out_node._id)
+            print(str(err))
 
     # Draw nodes - done after so they cover the lines
     if not display:

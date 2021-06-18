@@ -130,12 +130,23 @@ class Population():
   def natural_selection(self):
     self.speciate()
     self.prune_species()
+
+    # TESTING - goal: keep the population constant
+    # for species in self.species:
+    #   species.update_fitness()
+    # self.update_species_averages_sum()
+
     self.update_best_agent()
   
     # Agents for next generation
     offspring = []
 
     for species in self.species:
+      # TESTING
+      if len(species.members) == 0:
+        self.species.remove(species)
+        continue
+
       if len(species.members) >= 5:
         # Fitest member moves on unchanged
         offspring.append(Agent.clone(species.best_agent))

@@ -1,7 +1,7 @@
 from edge import Edge
 from node import Node
 from feedforward import Feedforward
-from config import INPUT_NODES, OUTPUT_NODES
+from config import INPUT_NODES, OUTPUT_NODES, SEED
 import random
 
 class Genome():
@@ -191,7 +191,7 @@ class Genome():
     
     # Add connection
     rand = random.uniform(0, 1)
-    if rand < 0.08:
+    if rand < 0.20:
       self.add_connection()
     
     # Add node

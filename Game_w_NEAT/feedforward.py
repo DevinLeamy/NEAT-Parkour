@@ -8,8 +8,6 @@ class Feedforward():
   def __init__(self, nodes):
     self.nodes = nodes
     self.generate_layers()
-    # print(len(nodes))
-    # print(sum([1 for node in nodes if node.is_output()]))
 
   # Compute output from input
   # inputs: int[] (not Input class)
