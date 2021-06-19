@@ -5,7 +5,7 @@ Using the NEAT genetic algorithm to solve a reinforcement learning problem. In o
 NEAT (Neural Evolution of Augmenting Typologies) is a genetic algorithm that, since 2002, has become a hallmark algorithm of reinforcement learning. Unlike backpropagation-based RL algorithms that rely on gradient descent, NEAT learns models by augmenting the weights and typologies (nodes and edges) of networks, starting from the most basic of networks - one edge connecting one input to one output. It's really amazing! ([Stanley, 2002](http://nn.cs.utexas.edu/downloads/papers/stanley.ec02.pdf))
 
 ## This Adventure
-In NEAT-Parkour, I use my implementation of NEAT to train AIs to play a parkour-platformer at a superhuman level. The initial population is `1000` agents. In each generation, agents play in batches of `150`. Moderate scores, `75 - 200`, can be achieved in fewer than `20` generations (< 1 hr). To achieve high scores, `200 - 250`, the population requires at least `20` generations (≈ 2 hr). The best score achieved `359` required 34 generations (> 4 hr).
+In NEAT-Parkour, I use my implementation of NEAT to train AIs to play a parkour-platformer (built in pygame) at a superhuman level. The initial population is `1000` agents. In each generation, agents play in batches of `150`. Moderate scores, `75 - 200`, can be achieved in fewer than `20` generations (< 1 hr). High scores, `200 - 250`, require at least `20` generations (≈ 2 hr). The best score achieved `359` required 34 generations (> 4 hr).
 
 ## Genome display 
 In the top right, you'll see the genome of current best agent. Input nodes are blue. Output nodes are red. Hidden nodes are grey. Active edges are green, inactive 
