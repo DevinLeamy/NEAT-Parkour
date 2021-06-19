@@ -26,4 +26,4 @@ edges are red. The width of edges increases with the magnitude of their weight.
 4. Attack
 
 ![NEAT2](https://user-images.githubusercontent.com/45083086/122322701-20e97180-cee3-11eb-95e4-bbfa3b44f246.png)
- 
+![NEAT3](https://user-images.githubusercontent.com/45083086/122326751-fea72200-cee9-11eb-9952-63fb2e188c36.png)
