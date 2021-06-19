@@ -11,4 +11,4 @@
 
 
 ## Naming
-- I use the term _edge_ in place of connection _gene_
+- I use the term _edge_ in place of _connection gene_

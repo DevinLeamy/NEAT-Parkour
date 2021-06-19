@@ -3,7 +3,6 @@ import random
 from enums import Level, Tile, Ob
 from config import *
 
-
 # Map
 class Map:
   def __init__(self):

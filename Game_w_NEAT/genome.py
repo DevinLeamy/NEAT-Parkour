@@ -1,26 +1,12 @@
 from edge import Edge
 from node import Node
 from feedforward import Feedforward
-from config import INPUT_NODES, OUTPUT_NODES, SEED
+from config import * 
 import random
 
 class Genome():
-  '''
-  next_id: Id of next node created
-  c1, c2, c3: Coefficients from compatibility function
-  c_threshold: Compatibility threshold
-  '''
+  # Id of next node created
   next_id = 0
-  c1 = 1.0
-  c2 = 1.0
-  # c3 = 0.4
-  c3 = 3.0 # For larger populations with room for more species
-  # c_threshold = 3.0 
-  c_threshold = 4.0 # For larger populations to accommodate the increased c3
-  '''
-  in_nodes: Number of input nodes
-  out_nodes: Number of output nodes
-  '''
   def __init__(self, initialize_nodes=True):
     self.in_nodes_cnt = INPUT_NODES
     self.out_nodes_cnt = OUTPUT_NODES 
@@ -42,7 +28,7 @@ class Genome():
     self.nodes.extend(in_nodes)
     self.nodes.extend(out_nodes)
 
-    if not initialize_nodes: # DEBUG - change this name (initialize_edge_bias??)
+    if not initialize_nodes: 
       return
    
     # Initialize single edge 
@@ -75,8 +61,7 @@ class Genome():
   
   # Determine maximum innovation number among edges
   def max_inv(self):
-    # There must be at least one edge
-    assert len(self.edges) != 0
+    assert len(self.edges) != 0 # Requires at least one edge
 
     max_inv = max([edge.inv for edge in self.edges])
     return max_inv
@@ -85,11 +70,8 @@ class Genome():
   def add_node(self):
     edges = self.all_edges()
 
-    # DEBUG if
-    if len(edges) == 0:
-      print("NO EDGES")
+    if len(edges) == 0: # Requires at least one edge
       return
-    assert len(edges) != 0
 
     # Select random edge 
     edge = random.choice(edges)
@@ -174,30 +156,23 @@ class Genome():
         return node
     return None
   
-  # TODO: Make probabilities configurable
   # Mutate genome 
   def mutate(self):
-    '''
-    - 80% chance weights are mutated 
-    - 5%  chance connection is added - 30% for large populations
-    - 3%  chance node is added
-    '''
-
     # Mutate weights 
-    rand = random.uniform(0, 1)
-    if rand < 0.8:
+    rand = random.uniform(0, 100)
+    if rand < PROB_MUTATE_WEIGHTS:
       edges = self.all_edges()
       for edge in edges:
         edge.mutate()
     
     # Add connection
-    rand = random.uniform(0, 1)
-    if rand < 0.20:
+    rand = random.uniform(0, 100)
+    if rand < PROB_ADD_CONNECTION:
       self.add_connection()
     
     # Add node
-    rand = random.uniform(0, 1)
-    if rand < 0.03:
+    rand = random.uniform(0, 100)
+    if rand < PROB_ADD_NODE:
       self.add_node()
   
   # Calculate compatibility of two genomes 
@@ -212,7 +187,7 @@ class Genome():
 
     # Normalizing factor
     N = max(len(edges_1), len(edges_2))
-    if N <= 20:
+    if N <= NORMALIZING_FACTOR_CUTOFF:
       N = 1
     
     # Number of excess and disjoint genes between parents
@@ -240,14 +215,13 @@ class Genome():
     W = Genome.average_weight_d(genome_1, genome_2)
 
     # Compatibility
-    comp = (Genome.c1 * E) / N + (Genome.c2 * D) / N + (Genome.c3 * W)
-    # print("E: %f, D: %f, W: %f, Compatibility: %f" % (E, D, W, comp))
+    comp = (C1 * E) / N + (C2 * D) / N + (C3 * W)
     return comp
 
   # Determine if genes are compatible - i.e. of the same species
   @staticmethod
   def compatible(gene_1, gene_2):
-    return Genome.compatibility(gene_1, gene_2) <= Genome.c_threshold
+    return Genome.compatibility(gene_1, gene_2) <= C_THRESHOLD 
    
   # Calculate average weight distance of matching genes
   @staticmethod

@@ -15,9 +15,11 @@ from feedforward import Feedforward
 class Game:
   '''
   SCN: Screen
+  CLK: Clock
   '''
-  def __init__(self, SCN):
+  def __init__(self, SCN, CLK):
     self.SCN = SCN
+    self.CLK = CLK
 
     # State of game
     self.done = False
@@ -39,7 +41,7 @@ class Game:
 
     # Score
     self.updates = 0
-    self.get_score = lambda : self.updates // 10 
+    self.get_score = lambda : self.updates // UPDATES_PER_SCORE 
 
     # Display strings 
     self.score_str = lambda score: "Score: %d" % (score)
@@ -73,7 +75,7 @@ class Game:
     score = self.get_score()
     generation = self.population.generation
     best_fitness = self.population.get_best_fitness()
-    population_sz = self.population.get_population_size()
+    population_sz = len(self.population.members)
     # +1 because batch numbers of 0 indexed
     batch = self.population.current_batch + 1
     batches = len(self.population.batches)
@@ -323,3 +325,29 @@ class Game:
         color = COLORS["output_node"]
       pygame.draw.circle(self.SCN, color, position, RAD)
 
+  # Launch game
+  def run_game(self):
+    for gen in range(GENERATIONS):
+      for batch in range(len(self.population.batches)):
+        # Game loop
+        while True:
+          for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_h:
+              # Stop game (starting highlights) 
+              return 
+          self.update() # Update display
+          if self.done: # Game over
+            break
+          pygame.display.update()
+          self.CLK.tick(DELAY) # Set speed
+        self.next_batch()
+      self.next_generation()
+      print("Best fitness: %d" % (self.population.get_best_fitness())) 
+
+  # Show highlights
+  def run_highlights(self):
+    self.show_highlights()
+    while not self.done:
+      self.update() # Update display
+      pygame.display.update()
+      self.CLK.tick(DELAY) # Set speed

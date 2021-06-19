@@ -1,7 +1,7 @@
 from agent import Agent
 from species import Species
 import math
-from config import MAX_STALENESS, BATCH_SZ
+from config import MAX_STALENESS, BATCH_SZ, CHAMP_CUTOFF
 
 # Controller of all members of the population
 class Population():
@@ -131,17 +131,11 @@ class Population():
     # Agents for next generation
     offspring = []
 
+    pop_size = self.get_population_size()
     for species in self.species:
-      # TESTING
-      if len(species.members) == 0:
-        print("ERROR: Species is empty")
-        assert False
-
-      if len(species.members) >= 5:
-        # Fitest member moves on unchanged
-        offspring.append(Agent.clone(species.best_agent))
-      
-      pop_size = self.get_population_size()
+      # if len(species.members) >= CHAMP_CUTOFF:
+      #   # Fittest member moves on unchanged
+      #   offspring.append(Agent.clone(species.best_agent))
       # Add offspring
       offspring.extend(species.offspring(pop_size, self.species_average_sum))
   
@@ -160,8 +154,6 @@ class Population():
     self.species_average_sum = sum([species.average_fitness for species in self.species])
   
   # Calculate population size
-  # Note: len(self.members) may not be correct because some agents in self.members 
-  #       have been either cut from their species or belong to a species that no longer exists
   def get_population_size(self):
     return sum([len(species.members) for species in self.species]) 
   
