@@ -1,23 +1,20 @@
 from agent import Agent
 from species import Species
 import math
-from config import MAX_STALENESS
+from config import MAX_STALENESS, BATCH_SZ
 
 # Controller of all members of the population
 class Population():
-  # Max number of agents in a training batch
-  BATCH_SZ = 150
   '''
   size: Initial population size
   generation: Generation the population was created
   '''
-  def __init__(self, size=150):
-    self.size = size
-    self.generation = 0 
+  def __init__(self, size):
+    self.generation = 1 
     
     # Initialize population members
     self.members = []
-    for i in range(self.size):
+    for i in range(size):
       self.members.append(Agent())
     
     # Initialize batches
@@ -30,6 +27,10 @@ class Population():
 
     # Player with the highest fitness
     self.best_agent = Agent.clone(self.members[0])
+    # Best agent from each generation
+    self.best_agents = [] 
+    # Index of currently highlighted agent in best_agents
+    self.highlight = 0 
 
     # Sum of all species average fitnesses
     self.species_average_sum = 0  
@@ -51,39 +52,36 @@ class Population():
   def update_best_agent(self):
     assert len(self.species[0].members) != 0
     # Best agent in current generation
-    current_gen_best = self.species[0].members[0] # Random member
+    generation_best = self.species[0].members[0] # Random member
 
     # Compare all agents
     for species in self.species:
       for agent in species.members:
-        if agent.fitness > current_gen_best.fitness:
-          current_gen_best = agent
+        if agent.fitness > generation_best.fitness:
+          generation_best = agent
     
-    if current_gen_best.fitness > self.best_agent.fitness:
+    # Store generation best
+    self.best_agents.append(Agent.clone(generation_best, copy_fitness=True))
+
+    if generation_best .fitness > self.best_agent.fitness:
       # Replace current best agent 
-      self.best_agent = Agent.clone(current_gen_best, copy_fitness=True)
+      self.best_agent = Agent.clone(generation_best, copy_fitness=True)
   
   # Prune stale species
   def prune_stale_species(self):
-    for species in self.species:
-      if species.staleness >= MAX_STALENESS:
-        # Remove species
-        self.species.remove(species)
+    keep = lambda species: species.staleness < MAX_STALENESS
+    self.species = [species for species in self.species if keep(species)]
   
   # Prune low preforming species - species that won't produce offspring
   def prune_low_preforming_species(self):
     pop_size = self.get_population_size()
-    for species in self.species:
-      if species.offspring_cnt(pop_size, self.species_average_sum) == 0:
-        # No offspring
-        self.species.remove(species)
+    keep = lambda species: species.offspring_cnt(pop_size, self.species_average_sum) > 0
+    self.species = [species for species in self.species if keep(species)] 
   
   # Prune empty species
   def prune_dead_species(self):
-    for species in self.species:
-      if len(species.members) == 0:
-        # Species is dead
-        self.species.remove(species)
+    keep = lambda species: len(species.members) > 0
+    self.species = [species for species in self.species if keep(species)] 
   
   # Prune week species
   def prune_species(self):
@@ -114,28 +112,20 @@ class Population():
     
     # Update new species
     for species in self.species:
-      if len(species.members) == 0:
-        self.species.remove(species)
-        continue
-
       species.cut_half()
       species.update_fitness()
+    
+    self.update_species_averages_sum()
+    self.prune_species()
+    self.update_species_averages_sum() # Average may have changed
 
     # Sort
     self.sort_species()
-    self.update_species_averages_sum()
 
   # Natural selection - prepare for next generation
   # Assumes the fitness of all agents has been calculated
   def natural_selection(self):
     self.speciate()
-    self.prune_species()
-
-    # TESTING - goal: keep the population constant
-    # for species in self.species:
-    #   species.update_fitness()
-    # self.update_species_averages_sum()
-
     self.update_best_agent()
   
     # Agents for next generation
@@ -144,8 +134,8 @@ class Population():
     for species in self.species:
       # TESTING
       if len(species.members) == 0:
-        self.species.remove(species)
-        continue
+        print("ERROR: Species is empty")
+        assert False
 
       if len(species.members) >= 5:
         # Fitest member moves on unchanged
@@ -191,13 +181,13 @@ class Population():
   # Distribute population into batchs
   def batch(self):
     # Group members into training batches
-    batch_cnt = math.ceil(len(self.members) / Population.BATCH_SZ) 
+    batch_cnt = math.ceil(len(self.members) / BATCH_SZ) 
     self.batches = [[] for i in range(batch_cnt)]
     self.current_batch = 0
 
     # Distribute agents
     for idx, agent in enumerate(self.members):
-      assert len(self.batches[idx % batch_cnt]) <= Population.BATCH_SZ
+      assert len(self.batches[idx % batch_cnt]) <= BATCH_SZ
       self.batches[idx % batch_cnt].append(agent)  
 
   # Get current batch
@@ -210,3 +200,30 @@ class Population():
   # Update current batch
   def update_batch(self):
     self.current_batch += 1
+  
+  # Update currently highlighted agent - return True if the game needs to reset
+  def update_highlight(self, game_grid, game_score):
+    agent = self.get_highlight()
+    if not agent.alive():
+      self.highlight += 1
+      self.generation += 1 # Generation of current highlight
+      return True
+
+    if self.highlights_done():
+      return False
+    self.best_agents[self.highlight].update(game_grid, game_score)
+    return False
+  
+  # Get currently highlighted agent 
+  def get_highlight(self):
+    if self.highlights_done():
+      return False
+    return self.best_agents[self.highlight]
+  
+  # Check if highlights are done
+  def highlights_done(self):
+    return self.highlight >= len(self.best_agents)
+  
+  # Reset generation
+  def reset_generation(self):
+    self.generation = 1

@@ -30,11 +30,11 @@ class Player(pygame.sprite.Sprite):
     self.head_row = Level.GRND - 2 # Two blocks above ground level
         
     # Id: (frame-count, updates-per-frame)
-    self.attacks = {1: [5, 3], 2: [6, 3], 3: [6, 3]}
+    self.attacks = {1: [5, 2], 2: [6, 2], 3: [6, 2]}
     self.jumps = {1: [4, 2]}    
     self.falls = {1: [4, 2]}
-    self.runs = {1: [6, 4]}
-    self.slides = {1: [6, 4]}
+    self.runs = {1: [6, 2]}
+    self.slides = {1: [6, 2]}
     
     # Generate image path
     self.get_attack_frame = lambda id, frame: "Adventurer/Sprites/adventurer-attack%d-0%d.png" % (id, frame)
@@ -105,8 +105,10 @@ class Player(pygame.sprite.Sprite):
       return
 
     # Break blocks
-    game_map[int(self.head_row)][self.LEFT_BUFFER + 2].break_block(self._id)
-    game_map[int(self.head_row + 1)][self.LEFT_BUFFER + 2].break_block(self._id)
+    HIT_RANGE = 4
+    for i in range(HIT_RANGE):
+      game_map[int(self.head_row)][self.LEFT_BUFFER + i].break_block(self._id)
+      game_map[int(self.head_row + 1)][self.LEFT_BUFFER + i].break_block(self._id)
 
     # Starts attacking
     self.animating = Move.ATK

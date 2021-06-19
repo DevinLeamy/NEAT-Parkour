@@ -59,7 +59,7 @@ class Feedforward():
         # Not fully connected 
         return False
 
-    print("Fully connected")
+    print("Fully connected", "Edges: %d" % (sum([len(node.out_bound_edges) for node in self.nodes])), "Nodes: %d" % (len(self.nodes)))
     # Fully connected 
     return True
   
@@ -91,7 +91,7 @@ class Feedforward():
       layer = self.layers[idx]
       non_output_nodes = [node for node in layer if not node.is_output()]
       for node in non_output_nodes: # Exclude output nodes
-        if len(node.out_bound_edges) != next_nodes:
+        if len(node.out_bound_edges) < next_nodes:
           # Has space
           potential_start.append((node, idx))
       next_nodes += len(non_output_nodes)
@@ -135,15 +135,17 @@ class Feedforward():
           if not edge.active: # Only active edges participate in feedforward 
             continue
           new_node = edge.out_node
-          # Avoid duplicates
-          if not new_node._id in seen: 
-            new_layer.append(new_node)
+          new_layer.append(new_node)
       current_layer = new_layer
     
-    # Outputs never visited
-    outputs = [node for node in self.nodes if node.is_output() and not node._id in seen]
+    # Nodes never visited
+    visited = lambda node: node._id in seen
+    outputs = [node for node in self.nodes if not visited(node)] 
 
     # Add outputs to last layer
+    if len(self.layers) == 1:
+      # No active edges from output
+      self.layers.append([])
     self.layers[-1].extend(outputs)
 
 

@@ -45,19 +45,18 @@ class Genome():
     if not initialize_nodes: # DEBUG - change this name (initialize_edge_bias??)
       return
    
-    # Initialize edges
-    for in_node in in_nodes:
-      # Create edges between all output nodes
-      for out_node in out_nodes:
-        edge = Edge(in_node, out_node, True) # Note that these are references
-        # Add edge to edges 
-        self.edges.append(edge)
+    # Initialize single edge 
+    in_node = random.choice(in_nodes) # Random input
+    out_node = random.choice(out_nodes) # Random output
 
-        # Add edge to endpoints (nodes)
-        in_node.add_edge(edge) # The utility of list is shown in feedforward.py
-        out_node.add_edge(edge)
-        break
-      break
+    edge = Edge(in_node, out_node, True) 
+
+    # Add edge to edges 
+    self.edges.append(edge)
+
+    # Add edge to endpoints (nodes)
+    in_node.add_edge(edge) # The utility of list is shown in feedforward.py
+    out_node.add_edge(edge)
     
   # Determine if genome contains matching gene (edge)
   def has_matching(self, edge):
@@ -163,8 +162,10 @@ class Genome():
   
   # Set nodes 
   def set_nodes(self, new_nodes):
-    # Extend is used to preserve input and output nodes
-    self.nodes.extend(new_nodes)
+    for node in new_nodes:
+      # Check if node with node._id exists
+      if self.get_node(node._id) == None:
+        self.nodes.append(node) # New node
 
   # Get node with _id
   def get_node(self, _id):
@@ -337,14 +338,12 @@ class Genome():
                    [edge_data[1] for edge_data in edges_data])
 
     # Create and set nodes
-    # Nodes, excluding input and output nodes, are created - input and output are create in the __init__()
-    nodes = [Node(_id) for _id in node_ids if _id >= clone.in_nodes_cnt + clone.out_nodes_cnt] 
+    nodes = [Node(_id) for _id in node_ids] 
     clone.set_nodes(nodes)
 
     # Create all edges and add edges to nodes
     edges = []
     for in_node_id, out_node_id, active, weight in edges_data:
-      # TODO: Get nodes - O(n), can be improved
       in_node = clone.get_node(in_node_id) 
       out_node = clone.get_node(out_node_id) 
 
@@ -359,5 +358,4 @@ class Genome():
 
     # Update child genome edges 
     clone.set_edges(edges)
-    
     return clone 

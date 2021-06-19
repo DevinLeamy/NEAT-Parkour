@@ -35,11 +35,11 @@ class Block(pygame.sprite.Sprite):
     self.rect = self.rect.move(-1 * Block.SHIFT_SZ, 0)
   
   # Do nothing
-  def break_block(self, player_id, single_player=False):
+  def break_block(self, player_id):
     return 
   
   # Does not collide, by default 
-  def collide(self, player_id, single_player=False):
+  def collide(self, player_id):
     return False
   
   # Increase speed
@@ -89,12 +89,8 @@ class WallBlock(Block):
     self.broken = set() 
   
   # Breaks block
-  def break_block(self, player_id, single_player=False):
+  def break_block(self, player_id):
     self.broken.add(player_id)
-
-    if (single_player):
-      # Update solid 
-      self.solid = False
 
     # Set block to broken block - need a different sprite
     # Note: Although the block may appear to be Air, if will still act as a solid for 
@@ -104,11 +100,7 @@ class WallBlock(Block):
 
   
   # Check for collision
-  def collide(self, player_id, single_player=False):
-    if single_player: 
-      # Collide if solid, don't otherwise
-      return self.solid
-
+  def collide(self, player_id):
     # Collide if block has hot been broken by player_id
     if player_id in self.broken:
       return False
@@ -120,7 +112,7 @@ class HardBlock(Block):
     super().__init__(row, col, image_path)
     self.solid = True
   
-  def collide(self, player_id, single_player=False):
+  def collide(self, player_id):
     # Always collide
     return True
 
