@@ -27,8 +27,9 @@ class Input():
       self.type2,
       self.shift_sz
     ]
-    # Assuming they're positive, all values are smaller than one
-    assert sum(_input) <= len(_input)
+    if sum(_input) > len(_input):
+      print(_input)
+      assert False
     return _input
   
   # Normalize input into range [-1, 1]

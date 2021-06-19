@@ -8,8 +8,6 @@ class Feedforward():
   def __init__(self, nodes):
     self.nodes = nodes
     self.generate_layers()
-    # print(len(nodes))
-    # print(sum([1 for node in nodes if node.is_output()]))
 
   # Compute output from input
   # inputs: int[] (not Input class)
@@ -61,7 +59,7 @@ class Feedforward():
         # Not fully connected 
         return False
 
-    print("Fully connected")
+    print("Fully connected", "Edges: %d" % (sum([len(node.out_bound_edges) for node in self.nodes])), "Nodes: %d" % (len(self.nodes)))
     # Fully connected 
     return True
   
@@ -93,7 +91,7 @@ class Feedforward():
       layer = self.layers[idx]
       non_output_nodes = [node for node in layer if not node.is_output()]
       for node in non_output_nodes: # Exclude output nodes
-        if len(node.out_bound_edges) != next_nodes:
+        if len(node.out_bound_edges) < next_nodes:
           # Has space
           potential_start.append((node, idx))
       next_nodes += len(non_output_nodes)
@@ -118,38 +116,36 @@ class Feedforward():
     1. Find input nodes (some with not edges leading into them)
     2. Preform BFS, storing nodes at depth i in layers[i] 
     '''
-    # Collect input nodes (first layer is input)
-    layer = [node for node in self.nodes if node.is_input()]
-    self.layers.append(layer)
-
+    # First layer of nodes 
+    current_layer = [node for node in self.nodes if node.is_input()]
     # Set of node _ids that have been visited
     seen = set() 
+
     # BFS
-    while len(layer) != 0:
+    while len(current_layer) != 0:
+      self.layers.append([])
       new_layer = []
-      for node in layer:
+      for node in current_layer:
         if node._id in seen:
           continue
         # Node has been seen
         seen.add(node._id)
+        self.layers[-1].append(node)
         for edge in node.out_bound_edges:
           if not edge.active: # Only active edges participate in feedforward 
             continue
           new_node = edge.out_node
-          # Avoid duplicates
-          if not new_node._id in seen: 
-            new_layer.append(new_node)
-      if len(new_layer) != 0:
-        self.layers.append(new_layer)
-      layer = new_layer
+          new_layer.append(new_node)
+      current_layer = new_layer
     
-    # Outputs never visited
-    outputs = [node for node in self.nodes if node.is_output() and not node._id in seen]
+    # Nodes never visited
+    visited = lambda node: node._id in seen
+    outputs = [node for node in self.nodes if not visited(node)] 
 
-    # for idx, layer in enumerate(self.layers):
-    #   print("IDX %d" % (idx), len(layer))
-    
     # Add outputs to last layer
+    if len(self.layers) == 1:
+      # No active edges from output
+      self.layers.append([])
     self.layers[-1].extend(outputs)
 
 

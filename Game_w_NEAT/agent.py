@@ -44,7 +44,7 @@ class Agent():
   # game_map: Map.grid 
   def update(self, game_map, score):
     # Only active players must be updated
-    if not self.player.alive:
+    if not self.alive():
       return 
 
     # Use genome-determined policy 
@@ -63,6 +63,14 @@ class Agent():
   def update_adjusted_fitness(self, members_cnt):
     assert members_cnt != 0
     self.fitness /= members_cnt
+  
+  # Reset agent player
+  def reset(self):
+    self.player = Player()
+  
+  # Return player state
+  def alive(self):
+    return self.player.alive
   
   # Copy of agent - only genome is copied, remaining values are defaults
   @staticmethod

@@ -8,7 +8,8 @@ from config import *
 class Map:
   def __init__(self):
     # Reseed random - makes the map predictable
-    random.seed(SEED)
+    self.random = random.Random()
+    self.random.seed(SEED)
 
     # Set buffer
     self.BUFFER = 5
@@ -33,7 +34,7 @@ class Map:
     for i in range(10, self.cols):
       if not i % 5 == 0:
         continue
-      ob = random.choice(OBSTACLES)
+      ob = self.random.choice(OBSTACLES)
       if ob == Ob.WALL:
         self.grid[Level.GRND - 2][i] = WallBlock(Level.GRND - 2, i)
         self.grid[Level.GRND - 1][i] = WallBlock(Level.GRND - 1, i)
@@ -103,8 +104,8 @@ class Map:
         continue
       elif i == Level.GRND - 2:
         # Make the number of obstacles a choice?
-        pos = random.choice(range(3, self.BUFFER))
-        ob = random.choice(OBSTACLES) 
+        pos = self.random.choice(range(3, self.BUFFER))
+        ob = self.random.choice(OBSTACLES) 
         
         # Add row buffers
         for j in range(new_cols):

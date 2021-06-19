@@ -34,7 +34,9 @@ class Species():
   
   # Update species fitness (called once every generation)
   def update_fitness(self): 
-    assert len(self.members) != 0
+    if len(self.members) == 0:
+      self.average_fitness = 0
+      return 
 
     # Update best fitness
     previous_best = self.best_fitness
@@ -83,12 +85,13 @@ class Species():
     assert pop_average_sum != 0
     offspring = int(self.average_fitness / pop_average_sum * pop_size) 
 
+    # The weekest half of the population has been removed
+    offspring *= 2
+
     if len(self.members) >= 5:
       # Champ has already been added
       offspring -= 1
-
-    # The weekest half of the population has been removed
-    offspring *= 2
+    
     return offspring
 
   # Produce offspring
