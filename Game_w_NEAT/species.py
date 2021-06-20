@@ -2,6 +2,7 @@ import random
 import math
 from genome import Genome
 from agent import Agent
+from config import PROB_MUTATION_WITHOUT_CROSSOVER, CHAMP_CUTOFF
 
 # Controlles a species
 class Species():
@@ -87,30 +88,20 @@ class Species():
 
     # The weekest half of the population has been removed
     offspring *= 2
-
-    if len(self.members) >= 5:
-      # Champ has already been added
-      offspring -= 1
-    
     return offspring
 
   # Produce offspring
   def offspring(self, pop_size, pop_average_sum):
     offspring = []
-    if len(self.members) >= 5:
+    if len(self.members) >= CHAMP_CUTOFF:
       # Fittest member move on unchanged
       offspring.append(Agent.clone(self.best_agent))
 
     # Produce offspring
     offspring_cnt = self.offspring_cnt(pop_size, pop_average_sum)
-    '''
-    Produce offspring
-    - 25% result from mutation without crossover
-    - 75% (the rest) result from the crossover from two random members of the species
-    '''
     for i in range(offspring_cnt):
-      rand = random.uniform(0, 1)
-      if rand < 0.25:
+      rand = random.uniform(0, 100)
+      if rand < PROB_MUTATION_WITHOUT_CROSSOVER:
         # Mutation without crossover
         child = Agent.clone(random.choice(self.members))
         child.genome.mutate()
@@ -118,7 +109,6 @@ class Species():
         assert child.player.alive
       else:
         # Cross over - parents can be the same
-        # Parents are not clones because their data does not change 
         parent_1 = random.choice(self.members)
         parent_2 = random.choice(self.members)
 

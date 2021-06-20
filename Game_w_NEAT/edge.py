@@ -1,11 +1,7 @@
 from node import Node
 import random
 from edge_history import EdgeHistory
-
-'''
-TODO: Make the weight bounds (-1, 1) and mutation power (2) configurable
-      hyperparameters
-'''
+from config import PROB_NEW_WEIGHT, WEIGHT_LOWER, WEIGHT_UPPER 
 
 # Connection gene between two nodes
 class Edge():
@@ -20,7 +16,7 @@ class Edge():
     self.in_node = in_node
     self.out_node = out_node
     self.active = active
-    self.weight = weight if weight != None else random.uniform(-1, 1)
+    self.weight = weight if weight != None else Edge.random_weight() 
 
     inv = EdgeHistory.get_innovation_number(in_node, out_node)
     if inv == -1:
@@ -32,19 +28,18 @@ class Edge():
   
   # Mutate weight 
   def mutate(self):
-    rand = random.uniform(0, 1)
+    rand = random.uniform(0, 100)
 
-    # New random value - 10% chance
-    if (rand <= 0.1):
-      # Bounds, (-1, 1), are arbitrary and may be subject to change
-      self.weight = random.uniform(-1, 1) 
+    # New random value 
+    if (rand <= PROB_NEW_WEIGHT):
+      self.weight = Edge.random_weight() 
     else:
-      # Uniformly perturbed (slight change) - 90% chance
+      # Uniformly perturbed (slight change)
       self.weight = self.clamp(self.weight + random.gauss(0, 0.2))
   
   # Squeeze input between a range
   def clamp(self, x):
-    return min(max(-1.0, x), 1.0)
+    return min(max(WEIGHT_LOWER, x), WEIGHT_UPPER)
 
   # Disable edge
   def disable(self):
@@ -54,7 +49,6 @@ class Edge():
   def enable(self):
     self.active = True
 
-  # TODO: Note were this is used (is it still used?)
   # Determine if edge matched self
   def edge_matches(self, new_edge_in_node, new_edge_out_node):
     # Input nodes must match
@@ -65,11 +59,15 @@ class Edge():
       return False
     return True
   
-  # TODO: Make this static
   # Determine if edge represents the same gene as self
   def gene_matches(self, edge):
     # Compare innovation numbers
     return edge.inv == self.inv
+  
+  # Generate random new weight
+  @staticmethod
+  def random_weight():
+    return random.uniform(WEIGHT_LOWER, WEIGHT_UPPER)
   
   # Calculate weight distance between edges
   @staticmethod
