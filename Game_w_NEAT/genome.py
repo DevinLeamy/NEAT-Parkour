@@ -307,7 +307,7 @@ class Genome():
   @staticmethod
   def clone_from_edges_data(edges_data):
     clone = Genome(initialize_nodes=False)
-    # Collect id's of all nodes used - edge_data[0]: in_node_id, edge_data[0]: out_node_id
+    # Collect id's of all nodes used - edge_data[0]: in_node_id, edge_data[1]: out_node_id
     node_ids = set([edge_data[0] for edge_data in edges_data] + 
                    [edge_data[1] for edge_data in edges_data])
 
