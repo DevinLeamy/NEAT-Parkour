@@ -17,9 +17,7 @@ The highlights of each generation (the best agents of each generation) are shown
 ![NEAT](https://user-images.githubusercontent.com/45083086/122660182-81bfb680-d13c-11eb-8cb1-159b71578594.png)
 
 [Early training](https://user-images.githubusercontent.com/45083086/122660420-9ef58480-d13e-11eb-94f2-599c3a072873.mov)
-
-
-
+[Later training](https://user-images.githubusercontent.com/45083086/122678262-46a49e00-d1a3-11eb-8fb9-fb6cfe130a23.mov)
 
 
 ### Inputs (6)
