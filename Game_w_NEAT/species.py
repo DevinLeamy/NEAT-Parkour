@@ -88,11 +88,6 @@ class Species():
 
     # The weekest half of the population has been removed
     offspring *= 2
-
-    if len(self.members) >= CHAMP_CUTOFF:
-      # Champ has already been added
-      offspring -= 1
-    
     return offspring
 
   # Produce offspring
