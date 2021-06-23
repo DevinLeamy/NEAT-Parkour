@@ -41,7 +41,7 @@ CHAMP_CUTOFF = 5 # Number of members a species must have before the champ is car
 
 
 # Other
-SEED = 1077 # Seem for random 
+SEED = 1077 # Seed for random 
  
 
 from image_loader import ImageLoader
